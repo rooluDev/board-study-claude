@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+         https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
+         version="5.0">
+
+  <display-name>Board System</display-name>
+  <description>게시판 시스템</description>
+
+  <!-- ========================================== -->
+  <!-- Context Parameters -->
+  <!-- ========================================== -->
+  <context-param>
+    <param-name>uploadPath</param-name>
+    <param-value>/uploads</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>maxFileSize</param-name>
+    <param-value>2097152</param-value> <!-- 2MB -->
+  </context-param>
+
+  <!-- ========================================== -->
+  <!-- Servlet Mappings -->
+  <!-- ========================================== -->
+
+  <!-- 게시글 목록 조회 -->
+  <servlet>
+    <servlet-name>BoardListServlet</servlet-name>
+    <servlet-class>com.example.board.controller.BoardListServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>BoardListServlet</servlet-name>
+    <url-pattern>/boards</url-pattern>
+  </servlet-mapping>
+
+  <!-- 게시글 상세 조회 -->
+  <servlet>
+    <servlet-name>BoardViewServlet</servlet-name>
+    <servlet-class>com.example.board.controller.BoardViewServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>BoardViewServlet</servlet-name>
+    <url-pattern>/board/view</url-pattern>
+  </servlet-mapping>
+
+  <!-- 게시글 작성 (GET: 작성 페이지, POST: 작성 처리) -->
+  <servlet>
+    <servlet-name>BoardPostServlet</servlet-name>
+    <servlet-class>com.example.board.controller.BoardPostServlet</servlet-class>
+    <multipart-config>
+      <max-file-size>2097152</max-file-size> <!-- 2MB -->
+      <max-request-size>6291456</max-request-size> <!-- 6MB (2MB * 3) -->
+      <file-size-threshold>1048576</file-size-threshold> <!-- 1MB -->
+    </multipart-config>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>BoardPostServlet</servlet-name>
+    <url-pattern>/board/post</url-pattern>
+  </servlet-mapping>
+
+  <!-- 게시글 수정 (GET: 수정 페이지, POST: 수정 처리) -->
+  <servlet>
+    <servlet-name>BoardEditServlet</servlet-name>
+    <servlet-class>com.example.board.controller.BoardEditServlet</servlet-class>
+    <multipart-config>
+      <max-file-size>2097152</max-file-size> <!-- 2MB -->
+      <max-request-size>6291456</max-request-size> <!-- 6MB (2MB * 3) -->
+      <file-size-threshold>1048576</file-size-threshold> <!-- 1MB -->
+    </multipart-config>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>BoardEditServlet</servlet-name>
+    <url-pattern>/board/edit</url-pattern>
+  </servlet-mapping>
+
+  <!-- 게시글 삭제 -->
+  <servlet>
+    <servlet-name>BoardDeleteServlet</servlet-name>
+    <servlet-class>com.example.board.controller.BoardDeleteServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>BoardDeleteServlet</servlet-name>
+    <url-pattern>/board/delete</url-pattern>
+  </servlet-mapping>
+
+  <!-- 댓글 등록 -->
+  <servlet>
+    <servlet-name>CommentServlet</servlet-name>
+    <servlet-class>com.example.board.controller.CommentServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>CommentServlet</servlet-name>
+    <url-pattern>/comment</url-pattern>
+  </servlet-mapping>
+
+  <!-- 파일 다운로드 -->
+  <servlet>
+    <servlet-name>FileDownloadServlet</servlet-name>
+    <servlet-class>com.example.board.controller.FileDownloadServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>FileDownloadServlet</servlet-name>
+    <url-pattern>/download</url-pattern>
+  </servlet-mapping>
+
+  <!-- 작성자 확인 (비밀번호 검증) -->
+  <servlet>
+    <servlet-name>AuthConfirmServlet</servlet-name>
+    <servlet-class>com.example.board.controller.AuthConfirmServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>AuthConfirmServlet</servlet-name>
+    <url-pattern>/auth/confirm</url-pattern>
+  </servlet-mapping>
+
+  <!-- ========================================== -->
+  <!-- Default Welcome File -->
+  <!-- ========================================== -->
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+
+  <!-- ========================================== -->
+  <!-- Error Pages -->
+  <!-- ========================================== -->
+  <error-page>
+    <error-code>404</error-code>
+    <location>/WEB-INF/views/error/404.jsp</location>
+  </error-page>
+
+  <error-page>
+    <error-code>500</error-code>
+    <location>/WEB-INF/views/error/500.jsp</location>
+  </error-page>
+
+  <!-- ========================================== -->
+  <!-- Session Configuration -->
+  <!-- ========================================== -->
+  <session-config>
+    <session-timeout>30</session-timeout> <!-- 30분 -->
+  </session-config>
+
+  <!-- ========================================== -->
+  <!-- Character Encoding Filter -->
+  <!-- ========================================== -->
+  <filter>
+    <filter-name>CharacterEncodingFilter</filter-name>
+    <filter-class>com.example.board.filter.CharacterEncodingFilter</filter-class>
+    <init-param>
+      <param-name>encoding</param-name>
+      <param-value>UTF-8</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>CharacterEncodingFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+</web-app>

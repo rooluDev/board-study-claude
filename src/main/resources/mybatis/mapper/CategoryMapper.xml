@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.board.dao.CategoryDAO">
+
+  <resultMap id="categoryResultMap" type="CategoryDTO">
+    <id property="categoryId" column="category_id"/>
+    <result property="categoryName" column="category_name"/>
+  </resultMap>
+
+  <select id="selectAll" resultMap="categoryResultMap">
+    SELECT
+      category_id,
+      category_name
+    FROM category
+    ORDER BY category_id ASC
+  </select>
+
+  <select id="selectById" parameterType="long" resultMap="categoryResultMap">
+    SELECT
+      category_id,
+      category_name
+    FROM category
+    WHERE category_id = #{categoryId}
+  </select>
+
+</mapper>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+  <!-- ========================================== -->
+  <!-- Settings -->
+  <!-- ========================================== -->
+  <settings>
+    <!-- 카멜케이스 자동 매핑 활성화 (user_name -> userName) -->
+    <setting name="mapUnderscoreToCamelCase" value="true"/>
+
+    <!-- NULL 값 처리 -->
+    <setting name="jdbcTypeForNull" value="NULL"/>
+
+    <!-- 지연 로딩 비활성화 (즉시 로딩 사용) -->
+    <setting name="lazyLoadingEnabled" value="false"/>
+
+    <!-- 로그 구현체 지정 -->
+    <setting name="logImpl" value="SLF4J"/>
+
+    <!-- 캐시 활성화 -->
+    <setting name="cacheEnabled" value="true"/>
+  </settings>
+
+  <!-- ========================================== -->
+  <!-- Type Aliases -->
+  <!-- ========================================== -->
+  <typeAliases>
+    <typeAlias type="com.example.board.dto.BoardDTO" alias="BoardDTO"/>
+    <typeAlias type="com.example.board.dto.CommentDTO" alias="CommentDTO"/>
+    <typeAlias type="com.example.board.dto.FileDTO" alias="FileDTO"/>
+    <typeAlias type="com.example.board.dto.CategoryDTO" alias="CategoryDTO"/>
+    <typeAlias type="com.example.board.dto.SearchCondition" alias="SearchCondition"/>
+  </typeAliases>
+
+  <!-- ========================================== -->
+  <!-- Environments -->
+  <!-- ========================================== -->
+  <environments default="development">
+    <environment id="development">
+      <!-- 트랜잭션 관리자 -->
+      <transactionManager type="JDBC"/>
+
+      <!-- 데이터소스 설정 -->
+      <dataSource type="POOLED">
+        <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/board_system?useSSL=false&amp;serverTimezone=Asia/Seoul&amp;characterEncoding=UTF-8"/>
+        <property name="username" value="root"/>
+        <property name="password" value="asd@1252370"/>
+
+        <!-- 커넥션 풀 설정 -->
+        <property name="poolMaximumActiveConnections" value="20"/>
+        <property name="poolMaximumIdleConnections" value="10"/>
+        <property name="poolTimeToWait" value="20000"/>
+        <property name="poolPingEnabled" value="true"/>
+        <property name="poolPingQuery" value="SELECT 1"/>
+      </dataSource>
+    </environment>
+  </environments>
+
+  <!-- ========================================== -->
+  <!-- Mappers -->
+  <!-- ========================================== -->
+  <mappers>
+    <mapper resource="mybatis/mapper/BoardMapper.xml"/>
+    <mapper resource="mybatis/mapper/CommentMapper.xml"/>
+    <mapper resource="mybatis/mapper/FileMapper.xml"/>
+    <mapper resource="mybatis/mapper/CategoryMapper.xml"/>
+  </mappers>
+
+</configuration>

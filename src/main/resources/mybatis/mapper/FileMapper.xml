@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.board.dao.FileDAO">
+
+  <resultMap id="fileResultMap" type="FileDTO">
+    <id property="fileId" column="file_id"/>
+    <result property="boardId" column="board_id"/>
+    <result property="originalName" column="original_name"/>
+    <result property="physicalName" column="physical_name"/>
+    <result property="filePath" column="file_path"/>
+    <result property="extension" column="extension"/>
+    <result property="size" column="size"/>
+    <result property="createdAt" column="created_at"/>
+    <result property="editedAt" column="edited_at"/>
+  </resultMap>
+
+  <select id="selectById" parameterType="long" resultMap="fileResultMap">
+    SELECT *
+    FROM file
+    WHERE file_id = #{fileId}
+  </select>
+
+  <select id="selectByBoardId" parameterType="long" resultMap="fileResultMap">
+    SELECT *
+    FROM file
+    WHERE board_id = #{boardId}
+    ORDER BY created_at ASC
+  </select>
+
+  <insert id="insert" parameterType="FileDTO" useGeneratedKeys="true" keyProperty="fileId">
+    INSERT INTO file (
+      board_id,
+      original_name,
+      physical_name,
+      file_path,
+      extension,
+      size
+    ) VALUES (
+      #{boardId},
+      #{originalName},
+      #{physicalName},
+      #{filePath},
+      #{extension},
+      #{size}
+    )
+  </insert>
+
+  <delete id="deleteById" parameterType="long">
+    DELETE FROM file
+    WHERE file_id = #{fileId}
+  </delete>
+
+  <delete id="deleteByBoardId" parameterType="long">
+    DELETE FROM file
+    WHERE board_id = #{boardId}
+  </delete>
+
+</mapper>

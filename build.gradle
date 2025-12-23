@@ -1,19 +1,52 @@
 plugins {
     id 'java'
+    id 'war'
 }
 
-group = 'org.example'
+group = 'com.example'
 version = '1.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
+    // Servlet & JSP (Jakarta EE 9 for Tomcat 10)
+    providedCompile 'jakarta.servlet:jakarta.servlet-api:5.0.0'
+    providedCompile 'jakarta.servlet.jsp:jakarta.servlet.jsp-api:3.0.0'
+
+    // JSTL
+    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:2.0.0'
+
+    // MyBatis
+    implementation 'org.mybatis:mybatis:3.5.13'
+
+    // MySQL Connector
+    implementation 'com.mysql:mysql-connector-j:8.0.33'
+
+    // Logging (SLF4J + Logback)
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation 'ch.qos.logback:logback-classic:1.4.11'
+
+    // JSON processing (for AJAX)
+    implementation 'com.google.code.gson:gson:2.10.1'
+
+    // Test
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 test {
     useJUnitPlatform()
+}
+
+// WAR 설정
+war {
+    archiveBaseName = 'board'
+    archiveVersion = '1.0.0'
 }
