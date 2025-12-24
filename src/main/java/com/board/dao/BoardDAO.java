@@ -75,4 +75,56 @@ public class BoardDAO {
       throw new BoardException("전체 게시글 수를 조회하는 중 오류가 발생했습니다.", e);
     }
   }
+
+  /**
+   * 게시글 ID로 게시글 상세 정보를 조회합니다.
+   *
+   * @param boardId 게시글 ID
+   * @return 게시글 상세 정보 (없으면 null)
+   * @throws BoardException 데이터베이스 조회 중 오류 발생 시
+   */
+  public Board selectBoardById(Long boardId) {
+    logger.debug("게시글 상세 조회: boardId={}", boardId);
+
+    try (SqlSession session = MyBatisUtil.openSession()) {
+      Board board = session.selectOne("com.board.dao.BoardDAO.selectBoardById", boardId);
+
+      if (board != null) {
+        logger.info("게시글 상세 조회 완료: boardId={}, title={}", boardId, board.getTitle());
+      } else {
+        logger.warn("게시글을 찾을 수 없음: boardId={}", boardId);
+      }
+
+      return board;
+
+    } catch (Exception e) {
+      logger.error("게시글 상세 조회 실패: {}", e.getMessage(), e);
+      throw new BoardException("게시글을 조회하는 중 오류가 발생했습니다.", e);
+    }
+  }
+
+  /**
+   * 게시글 조회수를 1 증가시킵니다.
+   *
+   * @param boardId 게시글 ID
+   * @throws BoardException 데이터베이스 업데이트 중 오류 발생 시
+   */
+  public void updateViewCount(Long boardId) {
+    logger.debug("조회수 증가: boardId={}", boardId);
+
+    try (SqlSession session = MyBatisUtil.openSession()) {
+      int affectedRows = session.update("com.board.dao.BoardDAO.updateViewCount", boardId);
+
+      if (affectedRows > 0) {
+        session.commit();
+        logger.info("조회수 증가 완료: boardId={}", boardId);
+      } else {
+        logger.warn("조회수 증가 실패 (게시글 없음): boardId={}", boardId);
+      }
+
+    } catch (Exception e) {
+      logger.error("조회수 증가 실패: {}", e.getMessage(), e);
+      throw new BoardException("조회수를 증가시키는 중 오류가 발생했습니다.", e);
+    }
+  }
 }

@@ -2,8 +2,10 @@ package com.board.service;
 
 import com.board.dao.BoardDAO;
 import com.board.dto.Board;
+import com.board.exception.BoardException;
 import com.board.exception.ValidationException;
 import com.board.util.Constants;
+import com.board.util.ValidationUtil;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,5 +98,35 @@ public class BoardService {
     if (page < 1) {
       throw new ValidationException("페이지 번호는 1 이상이어야 합니다.");
     }
+  }
+
+  /**
+   * 게시글 ID로 게시글 상세 정보를 조회합니다.
+   * 조회 시 조회수가 1 증가합니다.
+   *
+   * @param boardId 게시글 ID
+   * @return 게시글 상세 정보
+   * @throws ValidationException boardId가 유효하지 않은 경우
+   * @throws BoardException 게시글을 찾을 수 없는 경우
+   */
+  public Board getBoardById(Long boardId) {
+    // boardId 유효성 검증
+    ValidationUtil.validateBoardId(boardId);
+
+    logger.info("게시글 상세 조회 요청: boardId={}", boardId);
+
+    // 조회수 증가
+    boardDAO.updateViewCount(boardId);
+
+    // 게시글 조회
+    Board board = boardDAO.selectBoardById(boardId);
+
+    if (board == null) {
+      logger.warn("게시글을 찾을 수 없음: boardId={}", boardId);
+      throw new BoardException("게시글을 찾을 수 없습니다.");
+    }
+
+    logger.info("게시글 상세 조회 완료: boardId={}, title={}", boardId, board.getTitle());
+    return board;
   }
 }

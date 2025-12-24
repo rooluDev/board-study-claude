@@ -87,4 +87,48 @@
     FROM board
   </select>
 
+  <!-- ========================================
+       게시글 상세 조회
+       ======================================== -->
+
+  <!--
+    게시글 ID로 게시글 상세 정보 조회
+    카테고리 조인으로 카테고리명 포함
+
+    @param boardId 게시글 ID
+    @return 게시글 상세 정보
+  -->
+  <select id="selectBoardById" resultMap="BoardResultMap">
+    SELECT
+      b.board_id,
+      b.category_id,
+      b.title,
+      b.content,
+      b.user_name,
+      b.password,
+      b.views,
+      b.created_at,
+      b.edited_at,
+      c.category_name
+    FROM board b
+    INNER JOIN category c ON b.category_id = c.category_id
+    WHERE b.board_id = #{boardId}
+  </select>
+
+  <!-- ========================================
+       조회수 증가
+       ======================================== -->
+
+  <!--
+    게시글 조회수 1 증가
+    페이지 진입 시마다 실행
+
+    @param boardId 게시글 ID
+  -->
+  <update id="updateViewCount">
+    UPDATE board
+    SET views = views + 1
+    WHERE board_id = #{boardId}
+  </update>
+
 </mapper>

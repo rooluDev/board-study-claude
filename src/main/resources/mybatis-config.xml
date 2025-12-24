@@ -77,14 +77,13 @@
        ======================================== -->
   <mappers>
     <!-- 각 DAO에 대응하는 Mapper XML 파일 등록 -->
-    <!-- 생성된 매퍼부터 순차적으로 등록 -->
     <mapper resource="mapper/BoardMapper.xml"/>
+    <mapper resource="mapper/FileMapper.xml"/>
+    <mapper resource="mapper/CommentMapper.xml"/>
 
     <!-- 향후 추가 예정 -->
     <!--
     <mapper resource="mapper/CategoryMapper.xml"/>
-    <mapper resource="mapper/CommentMapper.xml"/>
-    <mapper resource="mapper/FileMapper.xml"/>
     -->
   </mappers>
 
