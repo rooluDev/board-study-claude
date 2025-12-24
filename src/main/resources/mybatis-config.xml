@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<!--
+  MyBatis 설정 파일
+
+  게시판 시스템의 데이터베이스 연결 및 매퍼 설정
+  - MySQL 8.0.31 연결
+  - DTO 타입 별칭 설정
+  - Mapper XML 파일 등록
+-->
+<configuration>
+
+  <!-- ========================================
+       Settings (전역 설정)
+       ======================================== -->
+  <settings>
+    <!-- 언더스코어를 카멜케이스로 자동 매핑 (user_name -> userName) -->
+    <setting name="mapUnderscoreToCamelCase" value="true"/>
+
+    <!-- NULL 값 처리 시 JDBC 타입 명시 -->
+    <setting name="jdbcTypeForNull" value="NULL"/>
+
+    <!-- SQL 로그 출력 (개발 환경) -->
+    <!-- 운영 환경에서는 주석 처리 권장 -->
+    <setting name="logImpl" value="STDOUT_LOGGING"/>
+  </settings>
+
+  <!-- ========================================
+       Type Aliases (타입 별칭)
+       ======================================== -->
+  <typeAliases>
+    <!-- com.board.dto 패키지의 모든 클래스를 별칭으로 등록 -->
+    <!-- 예: com.board.dto.Board -> Board -->
+    <package name="com.board.dto"/>
+  </typeAliases>
+
+  <!-- ========================================
+       Environments (환경 설정)
+       ======================================== -->
+  <environments default="development">
+    <environment id="development">
+      <!-- 트랜잭션 관리자: JDBC 사용 -->
+      <transactionManager type="JDBC"/>
+
+      <!-- 데이터소스: POOLED 타입 (커넥션 풀 사용) -->
+      <dataSource type="POOLED">
+        <!-- MySQL JDBC 드라이버 -->
+        <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+
+        <!-- 데이터베이스 연결 URL -->
+        <!-- useSSL=false: SSL 비활성화 (개발 환경) -->
+        <!-- serverTimezone=Asia/Seoul: 시간대 설정 -->
+        <!-- allowPublicKeyRetrieval=true: 공개키 검색 허용 -->
+        <property name="url"
+                  value="jdbc:mysql://localhost:3306/board_system?useSSL=false&amp;serverTimezone=Asia/Seoul&amp;allowPublicKeyRetrieval=true"/>
+
+        <!-- 데이터베이스 사용자명 -->
+        <property name="username" value="root"/>
+
+        <!-- 데이터베이스 비밀번호 -->
+        <property name="password" value="asd@1252370"/>
+
+        <!-- 커넥션 풀 설정 -->
+        <property name="poolMaximumActiveConnections" value="10"/>
+        <property name="poolMaximumIdleConnections" value="5"/>
+        <property name="poolMaximumCheckoutTime" value="20000"/>
+        <property name="poolTimeToWait" value="20000"/>
+      </dataSource>
+    </environment>
+  </environments>
+
+  <!-- ========================================
+       Mappers (매퍼 등록)
+       ======================================== -->
+  <mappers>
+    <!-- 각 DAO에 대응하는 Mapper XML 파일 등록 -->
+    <!-- 파일 생성 전까지 주석 처리 -->
+    <!--
+    <mapper resource="mapper/CategoryMapper.xml"/>
+    <mapper resource="mapper/BoardMapper.xml"/>
+    <mapper resource="mapper/CommentMapper.xml"/>
+    <mapper resource="mapper/FileMapper.xml"/>
+    -->
+  </mappers>
+
+</configuration>
