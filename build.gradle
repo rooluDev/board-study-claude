@@ -1,19 +1,69 @@
+/**
+ * 게시판 프로젝트 Gradle 빌드 설정
+ *
+ * Servlet/JSP 기반 CRUD 게시판 시스템
+ * - Java 17
+ * - Servlet 6.0.0
+ * - JSP 3.1.0
+ * - MyBatis 3.5.13
+ * - MySQL 8.0.31
+ */
+
 plugins {
-    id 'java'
+  id 'java'
+  id 'war'
 }
 
-group = 'org.example'
+group = 'com.board'
 version = '1.0-SNAPSHOT'
 
+// Java 17 사용
+java {
+  sourceCompatibility = JavaVersion.VERSION_17
+  targetCompatibility = JavaVersion.VERSION_17
+}
+
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+  // Servlet API 6.0.0 (Jakarta EE 10)
+  compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+
+  // JSP API 3.1.0 (Jakarta EE 10)
+  compileOnly 'jakarta.servlet.jsp:jakarta.servlet.jsp-api:3.1.0'
+
+  // MyBatis 3.5.13
+  implementation 'org.mybatis:mybatis:3.5.13'
+
+  // MySQL JDBC Driver 8.0.33
+  implementation 'com.mysql:mysql-connector-j:8.0.33'
+
+  // SLF4J API (로깅)
+  implementation 'org.slf4j:slf4j-api:2.0.9'
+
+  // SLF4J Simple 구현체 (개발용)
+  implementation 'org.slf4j:slf4j-simple:2.0.9'
+
+  // JSON 처리 (댓글, 삭제 등 AJAX 요청/응답용)
+  implementation 'com.google.code.gson:gson:2.10.1'
+
+  // 테스트 의존성
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
 }
 
-test {
-    useJUnitPlatform()
+tasks.named('test') {
+  useJUnitPlatform()
+}
+
+// WAR 파일 설정
+war {
+  archiveFileName = 'board-system.war'
+}
+
+// 컴파일 인코딩 설정
+tasks.withType(JavaCompile) {
+  options.encoding = 'UTF-8'
 }
