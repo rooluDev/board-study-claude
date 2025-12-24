@@ -64,17 +64,17 @@
                                 <td><c:out value="${board.categoryName}"/></td>
                                 <td>
                                     <a href="${pageContext.request.contextPath}/board/view?boardId=${board.boardId}&page=${currentPage}&category=${condition.categoryId}&from=${condition.from}&to=${condition.to}&keyword=${condition.keyword}">
-                                        <c:if test="${board.hasAttachment}">📎</c:if>
+                                        <c:if test="${board.hasAttachment}">📁</c:if>
                                         <c:out value="${board.title}"/>
                                     </a>
                                 </td>
                                 <td><c:out value="${board.userName}"/></td>
                                 <td>${board.views}</td>
-                                <td><fmt:formatDate value="${board.createdAt}" pattern="yyyy-MM-dd HH:mm"/></td>
+                                <td><c:out value="${board.formattedCreatedAtShort}"/></td>
                                 <td>
                                     <c:choose>
                                         <c:when test="${board.editedAt != null}">
-                                            <fmt:formatDate value="${board.editedAt}" pattern="yyyy-MM-dd HH:mm"/>
+                                            <c:out value="${board.formattedEditedAtShort}"/>
                                         </c:when>
                                         <c:otherwise>-</c:otherwise>
                                     </c:choose>

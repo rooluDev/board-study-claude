@@ -15,9 +15,9 @@
         <div class="board-info">
             <span>작성자: <c:out value="${board.userName}"/></span>
             <span>조회수: ${board.views}</span>
-            <span>등록일: <fmt:formatDate value="${board.createdAt}" pattern="yyyy-MM-dd HH:mm:ss"/></span>
+            <span>등록일: <c:out value="${board.formattedCreatedAt}"/></span>
             <c:if test="${board.editedAt != null}">
-                <span>수정일: <fmt:formatDate value="${board.editedAt}" pattern="yyyy-MM-dd HH:mm:ss"/></span>
+                <span>수정일: <c:out value="${board.formattedEditedAt}"/></span>
             </c:if>
         </div>
 
@@ -48,7 +48,7 @@
                 <c:forEach var="comment" items="${board.comments}">
                     <li>
                         <div class="comment-date">
-                            <fmt:formatDate value="${comment.createdAt}" pattern="yyyy-MM-dd HH:mm"/>
+                            <c:out value="${comment.formattedCreatedAt}"/>
                         </div>
                         <div class="comment-content">
                             <c:out value="${comment.comment}"/>
