@@ -55,6 +55,16 @@ public class Board {
   private Timestamp editedAt;
 
   /**
+   * 카테고리명 (조인을 통해 조회, 목록 조회용)
+   */
+  private String categoryName;
+
+  /**
+   * 첨부파일 존재 여부 (목록 조회용)
+   */
+  private Boolean hasFile;
+
+  /**
    * 기본 생성자
    */
   public Board() {
@@ -247,6 +257,42 @@ public class Board {
    */
   public void setEditedAt(Timestamp editedAt) {
     this.editedAt = editedAt;
+  }
+
+  /**
+   * 카테고리명을 반환합니다.
+   *
+   * @return 카테고리명
+   */
+  public String getCategoryName() {
+    return categoryName;
+  }
+
+  /**
+   * 카테고리명을 설정합니다.
+   *
+   * @param categoryName 카테고리명
+   */
+  public void setCategoryName(String categoryName) {
+    this.categoryName = categoryName;
+  }
+
+  /**
+   * 첨부파일 존재 여부를 반환합니다.
+   *
+   * @return 첨부파일이 있으면 true, 없으면 false
+   */
+  public Boolean getHasFile() {
+    return hasFile;
+  }
+
+  /**
+   * 첨부파일 존재 여부를 설정합니다.
+   *
+   * @param hasFile 첨부파일 존재 여부
+   */
+  public void setHasFile(Boolean hasFile) {
+    this.hasFile = hasFile;
   }
 
   @Override
