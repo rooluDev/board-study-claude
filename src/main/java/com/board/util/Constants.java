@@ -39,9 +39,14 @@ public final class Constants {
   public static final int MAX_FILE_COUNT = 3;
 
   /**
-   * 파일 업로드 디렉토리 경로
+   * 파일 업로드 디렉토리 경로 (웹 경로)
    */
   public static final String UPLOAD_DIR = "/uploads";
+
+  /**
+   * 파일 업로드 물리적 경로 (절대 경로)
+   */
+  public static final String FILE_UPLOAD_PATH = "/Users/user/workspace/claude/board-model2/src/main/webapp/uploads/";
 
   /**
    * 허용되는 파일 확장자 배열
