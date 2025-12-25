@@ -50,6 +50,28 @@
   </select>
 
   <!-- ========================================
+       댓글 등록
+       ======================================== -->
+
+  <!--
+    댓글 등록
+    생성된 commentId를 반환 (useGeneratedKeys)
+
+    @param comment 댓글 정보
+  -->
+  <insert id="insertComment" parameterType="Comment" useGeneratedKeys="true" keyProperty="commentId">
+    INSERT INTO comment (
+      board_id,
+      comment,
+      created_at
+    ) VALUES (
+      #{boardId},
+      #{comment},
+      CURRENT_TIMESTAMP
+    )
+  </insert>
+
+  <!-- ========================================
        게시글별 댓글 삭제
        ======================================== -->
 

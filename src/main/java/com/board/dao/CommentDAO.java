@@ -42,6 +42,37 @@ public class CommentDAO {
   }
 
   /**
+   * 댓글을 등록합니다.
+   * 등록 후 생성된 commentId가 Comment 객체에 설정됩니다.
+   *
+   * @param comment 등록할 댓글 정보
+   * @throws BoardException 데이터베이스 삽입 중 오류 발생 시
+   */
+  public void insertComment(Comment comment) {
+    logger.debug("댓글 등록: boardId={}, content={}",
+        comment.getBoardId(), comment.getComment());
+
+    try (SqlSession session = MyBatisUtil.openSession()) {
+      int affectedRows = session.insert("com.board.dao.CommentDAO.insertComment", comment);
+
+      if (affectedRows > 0) {
+        session.commit();
+        logger.info("댓글 등록 완료: commentId={}, boardId={}",
+            comment.getCommentId(), comment.getBoardId());
+      } else {
+        logger.error("댓글 등록 실패: affectedRows=0");
+        throw new BoardException("댓글 등록에 실패했습니다.");
+      }
+
+    } catch (BoardException e) {
+      throw e;
+    } catch (Exception e) {
+      logger.error("댓글 등록 실패: {}", e.getMessage(), e);
+      throw new BoardException("댓글을 등록하는 중 오류가 발생했습니다.", e);
+    }
+  }
+
+  /**
    * 특정 게시글의 모든 댓글을 삭제합니다.
    * 게시글 삭제 시 사용 (CASCADE 대신 명시적 삭제)
    *

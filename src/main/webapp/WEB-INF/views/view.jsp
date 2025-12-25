@@ -452,11 +452,14 @@
     <!-- 댓글 등록 폼 -->
     <div class="comment-form">
       <h3>댓글 작성</h3>
-      <form action="${pageContext.request.contextPath}/comment" method="post">
-        <input type="hidden" name="boardId" value="<%= board.getBoardId() %>">
-        <textarea name="content" rows="4" placeholder="댓글을 입력하세요 (1~300자)" maxlength="300" required></textarea>
-        <button type="submit">댓글 등록</button>
-      </form>
+      <textarea id="commentContent" rows="4" placeholder="댓글을 입력하세요 (1~300자)" maxlength="300"></textarea>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+        <span id="commentCharCount" style="font-size: 12px; color: #6c757d;">0 / 300자</span>
+        <div>
+          <button type="button" onclick="submitComment()" style="padding: 8px 16px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">댓글 등록</button>
+        </div>
+      </div>
+      <div id="commentError" style="color: #dc3545; font-size: 13px; margin-top: 8px; display: none;"></div>
     </div>
 
     <!-- 버튼 -->
@@ -718,7 +721,119 @@
           }
         });
       }
+
+      // 댓글 입력 글자 수 카운터
+      const commentContent = document.getElementById('commentContent');
+      const commentCharCount = document.getElementById('commentCharCount');
+      if (commentContent && commentCharCount) {
+        commentContent.addEventListener('input', function() {
+          const length = commentContent.value.length;
+          commentCharCount.textContent = length + ' / 300자';
+        });
+      }
     });
+
+    // 댓글 등록
+    function submitComment() {
+      const commentContent = document.getElementById('commentContent');
+      const commentError = document.getElementById('commentError');
+      const content = commentContent.value.trim();
+
+      // 입력값 검증
+      if (content.length === 0) {
+        commentError.textContent = '댓글 내용을 입력해주세요.';
+        commentError.style.display = 'block';
+        commentContent.focus();
+        return;
+      }
+
+      if (content.length < 1 || content.length > 300) {
+        commentError.textContent = '댓글은 1자 이상 300자 이하로 입력해주세요.';
+        commentError.style.display = 'block';
+        commentContent.focus();
+        return;
+      }
+
+      // 오류 메시지 숨김
+      commentError.style.display = 'none';
+
+      // AJAX로 댓글 등록 요청
+      const boardId = <%= board.getBoardId() %>;
+      const requestData = {
+        boardId: boardId,
+        content: content
+      };
+
+      fetch('<%= request.getContextPath() %>/comment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // 등록 성공 - 댓글 목록에 새 댓글 추가
+          addCommentToList(data.comment);
+
+          // 입력 필드 초기화
+          commentContent.value = '';
+          document.getElementById('commentCharCount').textContent = '0 / 300자';
+
+          // 성공 메시지 표시 (옵션)
+          alert(data.message);
+        } else {
+          // 등록 실패
+          commentError.textContent = data.message;
+          commentError.style.display = 'block';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        commentError.textContent = '댓글 등록 중 오류가 발생했습니다.';
+        commentError.style.display = 'block';
+      });
+    }
+
+    // 댓글 목록에 새 댓글 추가
+    function addCommentToList(comment) {
+      const commentsDiv = document.querySelector('.comments');
+      if (!commentsDiv) return;
+
+      // "댓글이 없습니다" 메시지 제거
+      const noDataMsg = commentsDiv.querySelector('.no-data');
+      if (noDataMsg) {
+        noDataMsg.remove();
+      }
+
+      // 새 댓글 요소 생성
+      const commentItem = document.createElement('div');
+      commentItem.className = 'comment-item';
+
+      const commentDate = document.createElement('div');
+      commentDate.className = 'comment-date';
+      commentDate.textContent = comment.createdAt;
+
+      const commentContentDiv = document.createElement('div');
+      commentContentDiv.className = 'comment-content';
+      commentContentDiv.textContent = comment.comment;
+
+      commentItem.appendChild(commentDate);
+      commentItem.appendChild(commentContentDiv);
+
+      // 댓글 목록 h3 태그 찾기
+      const h3 = commentsDiv.querySelector('h3');
+
+      // h3 다음에 댓글 추가 (마지막에 추가)
+      commentsDiv.appendChild(commentItem);
+
+      // 댓글 개수 업데이트
+      const currentCount = commentsDiv.querySelectorAll('.comment-item').length;
+      if (h3) {
+        h3.textContent = '댓글 (' + currentCount + ')';
+      }
+    }
   </script>
 </body>
 </html>
