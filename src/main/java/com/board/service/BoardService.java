@@ -49,46 +49,61 @@ public class BoardService {
   }
 
   /**
-   * 페이징된 게시글 목록을 조회합니다.
+   * 페이징된 게시글 목록을 조회합니다 (검색 기능 포함).
    *
    * @param page 페이지 번호 (1부터 시작)
+   * @param category 카테고리 ID (null 가능)
+   * @param from 등록일시 시작 (null 가능)
+   * @param to 등록일시 종료 (null 가능)
+   * @param keyword 검색어 (null 가능)
    * @return 게시글 목록
    * @throws ValidationException 페이지 번호가 유효하지 않은 경우
    */
-  public List<Board> getBoardList(int page) {
+  public List<Board> getBoardList(int page, Integer category, String from, String to,
+      String keyword) {
     // 페이지 번호 유효성 검증
     validatePageNumber(page);
 
-    logger.info("게시글 목록 조회 요청: page={}", page);
+    logger.info("게시글 목록 조회 요청: page={}, category={}, from={}, to={}, keyword={}",
+        page, category, from, to, keyword);
 
     // DAO를 통해 게시글 목록 조회
-    List<Board> boards = boardDAO.selectBoardList(page);
+    List<Board> boards = boardDAO.selectBoardList(page, category, from, to, keyword);
 
     logger.info("게시글 목록 조회 완료: {} 건", boards.size());
     return boards;
   }
 
   /**
-   * 전체 게시글 수를 조회합니다.
+   * 전체 게시글 수를 조회합니다 (검색 조건 포함).
    *
+   * @param category 카테고리 ID (null 가능)
+   * @param from 등록일시 시작 (null 가능)
+   * @param to 등록일시 종료 (null 가능)
+   * @param keyword 검색어 (null 가능)
    * @return 전체 게시글 수
    */
-  public int getTotalCount() {
-    logger.debug("전체 게시글 수 조회 요청");
+  public int getTotalCount(Integer category, String from, String to, String keyword) {
+    logger.debug("전체 게시글 수 조회 요청: category={}, from={}, to={}, keyword={}",
+        category, from, to, keyword);
 
-    int totalCount = boardDAO.countBoards();
+    int totalCount = boardDAO.countBoards(category, from, to, keyword);
 
     logger.info("전체 게시글 수: {} 건", totalCount);
     return totalCount;
   }
 
   /**
-   * 전체 페이지 수를 계산합니다.
+   * 전체 페이지 수를 계산합니다 (검색 조건 포함).
    *
+   * @param category 카테고리 ID (null 가능)
+   * @param from 등록일시 시작 (null 가능)
+   * @param to 등록일시 종료 (null 가능)
+   * @param keyword 검색어 (null 가능)
    * @return 전체 페이지 수
    */
-  public int getTotalPages() {
-    int totalCount = getTotalCount();
+  public int getTotalPages(Integer category, String from, String to, String keyword) {
+    int totalCount = getTotalCount(category, from, to, keyword);
 
     // 전체 페이지 수 = (전체 게시글 수 + 페이지 크기 - 1) / 페이지 크기
     // 예: 총 25개, 페이지당 10개 -> (25 + 10 - 1) / 10 = 3 페이지

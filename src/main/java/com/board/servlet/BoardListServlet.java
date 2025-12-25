@@ -42,7 +42,7 @@ public class BoardListServlet extends HttpServlet {
 
   /**
    * GET 요청 처리
-   * 게시글 목록을 조회하여 list.jsp로 forward
+   * 게시글 목록을 조회하여 list.jsp로 forward (검색 기능 포함)
    *
    * @param request HTTP 요청
    * @param response HTTP 응답
@@ -59,24 +59,38 @@ public class BoardListServlet extends HttpServlet {
       // 페이지 번호 파라미터 추출 (기본값: 1)
       int page = getPageParameter(request);
 
-      logger.debug("요청 페이지: {}", page);
+      // 검색 파라미터 추출
+      Integer category = getCategoryParameter(request);
+      String from = getSearchParameter(request, "from");
+      String to = getSearchParameter(request, "to");
+      String keyword = getSearchParameter(request, "keyword");
 
-      // 게시글 목록 조회
-      List<Board> boards = boardService.getBoardList(page);
+      logger.debug("검색 조건 - page: {}, category: {}, from: {}, to: {}, keyword: {}",
+          page, category, from, to, keyword);
 
-      // 전체 페이지 수 계산
-      int totalPages = boardService.getTotalPages();
+      // 게시글 목록 조회 (검색 조건 포함)
+      List<Board> boards = boardService.getBoardList(page, category, from, to, keyword);
 
-      // 전체 게시글 수 조회
-      int totalCount = boardService.getTotalCount();
+      // 전체 페이지 수 계산 (검색 조건 포함)
+      int totalPages = boardService.getTotalPages(category, from, to, keyword);
 
-      // request attribute 설정
+      // 전체 게시글 수 조회 (검색 조건 포함)
+      int totalCount = boardService.getTotalCount(category, from, to, keyword);
+
+      // request attribute 설정 (JSP에서 사용)
       request.setAttribute("boards", boards);
       request.setAttribute("currentPage", page);
       request.setAttribute("totalPages", totalPages);
       request.setAttribute("totalCount", totalCount);
 
-      logger.info("게시글 목록 조회 성공: {} 건, 페이지 {}/{}", boards.size(), page, totalPages);
+      // 검색 조건을 request attribute로 설정 (JSP에서 검색 폼 유지용)
+      request.setAttribute("category", category != null ? String.valueOf(category) : "");
+      request.setAttribute("from", from != null ? from : "");
+      request.setAttribute("to", to != null ? to : "");
+      request.setAttribute("keyword", keyword != null ? keyword : "");
+
+      logger.info("게시글 목록 조회 성공: {} 건, 페이지 {}/{}",
+          boards.size(), page, totalPages);
 
       // list.jsp로 forward
       request.getRequestDispatcher("/WEB-INF/views/list.jsp").forward(request, response);
@@ -122,5 +136,45 @@ public class BoardListServlet extends HttpServlet {
       logger.warn("잘못된 페이지 번호 형식: {}", pageParam);
       return 1;
     }
+  }
+
+  /**
+   * 요청 파라미터에서 카테고리 ID를 추출합니다.
+   * 파라미터가 없거나 잘못된 형식인 경우 null을 반환합니다.
+   *
+   * @param request HTTP 요청
+   * @return 카테고리 ID (null 가능)
+   */
+  private Integer getCategoryParameter(HttpServletRequest request) {
+    String categoryParam = request.getParameter("category");
+
+    if (categoryParam == null || categoryParam.trim().isEmpty()) {
+      return null;
+    }
+
+    try {
+      return Integer.parseInt(categoryParam);
+    } catch (NumberFormatException e) {
+      logger.warn("잘못된 카테고리 ID 형식: {}", categoryParam);
+      return null;
+    }
+  }
+
+  /**
+   * 요청 파라미터에서 검색 조건을 추출합니다.
+   * 파라미터가 없거나 빈 문자열인 경우 null을 반환합니다.
+   *
+   * @param request HTTP 요청
+   * @param paramName 파라미터 이름
+   * @return 검색 조건 값 (null 가능)
+   */
+  private String getSearchParameter(HttpServletRequest request, String paramName) {
+    String param = request.getParameter(paramName);
+
+    if (param == null || param.trim().isEmpty()) {
+      return null;
+    }
+
+    return param.trim();
   }
 }

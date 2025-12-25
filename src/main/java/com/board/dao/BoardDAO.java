@@ -22,23 +22,32 @@ public class BoardDAO {
   private static final Logger logger = LoggerFactory.getLogger(BoardDAO.class);
 
   /**
-   * 페이징된 게시글 목록을 조회합니다.
+   * 페이징된 게시글 목록을 조회합니다 (검색 기능 포함).
    *
    * @param page 페이지 번호 (1부터 시작)
+   * @param category 카테고리 ID (null 가능)
+   * @param from 등록일시 시작 (null 가능)
+   * @param to 등록일시 종료 (null 가능)
+   * @param keyword 검색어 (null 가능)
    * @return 게시글 목록
    * @throws BoardException 데이터베이스 조회 중 오류 발생 시
    */
-  public List<Board> selectBoardList(int page) {
+  public List<Board> selectBoardList(int page, Integer category, String from, String to,
+      String keyword) {
     // OFFSET 계산: (페이지 번호 - 1) * 페이지 크기
     int offset = (page - 1) * Constants.PAGE_SIZE;
 
-    logger.debug("게시글 목록 조회: page={}, offset={}, pageSize={}",
-        page, offset, Constants.PAGE_SIZE);
+    logger.debug("게시글 목록 조회: page={}, category={}, from={}, to={}, keyword={}",
+        page, category, from, to, keyword);
 
     try (SqlSession session = MyBatisUtil.openSession()) {
       Map<String, Object> params = new HashMap<>();
       params.put("offset", offset);
       params.put("pageSize", Constants.PAGE_SIZE);
+      params.put("category", category);
+      params.put("from", from);
+      params.put("to", to);
+      params.put("keyword", keyword);
 
       List<Board> boards = session.selectList("com.board.dao.BoardDAO.selectBoardList", params);
 
@@ -52,16 +61,27 @@ public class BoardDAO {
   }
 
   /**
-   * 전체 게시글 수를 조회합니다.
+   * 전체 게시글 수를 조회합니다 (검색 조건 포함).
    *
+   * @param category 카테고리 ID (null 가능)
+   * @param from 등록일시 시작 (null 가능)
+   * @param to 등록일시 종료 (null 가능)
+   * @param keyword 검색어 (null 가능)
    * @return 전체 게시글 수
    * @throws BoardException 데이터베이스 조회 중 오류 발생 시
    */
-  public int countBoards() {
-    logger.debug("전체 게시글 수 조회");
+  public int countBoards(Integer category, String from, String to, String keyword) {
+    logger.debug("전체 게시글 수 조회: category={}, from={}, to={}, keyword={}",
+        category, from, to, keyword);
 
     try (SqlSession session = MyBatisUtil.openSession()) {
-      Integer count = session.selectOne("com.board.dao.BoardDAO.countBoards");
+      Map<String, Object> params = new HashMap<>();
+      params.put("category", category);
+      params.put("from", from);
+      params.put("to", to);
+      params.put("keyword", keyword);
+
+      Integer count = session.selectOne("com.board.dao.BoardDAO.countBoards", params);
 
       if (count == null) {
         count = 0;
