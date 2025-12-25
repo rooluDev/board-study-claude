@@ -223,7 +223,7 @@
     String errorMessage = (String) request.getAttribute("errorMessage");
 
     // 검색 조건
-    String page = (String) request.getAttribute("page");
+    String currentPage = (String) request.getAttribute("page");
     String category = (String) request.getAttribute("category");
     String from = (String) request.getAttribute("from");
     String to = (String) request.getAttribute("to");
@@ -272,7 +272,7 @@
 
       <!-- Hidden Fields -->
       <input type="hidden" name="boardId" value="<%= board.getBoardId() %>">
-      <input type="hidden" name="page" value="<%= page != null ? page : "" %>">
+      <input type="hidden" name="page" value="<%= currentPage != null ? currentPage : "" %>">
       <input type="hidden" name="category" value="<%= category != null ? category : "" %>">
       <input type="hidden" name="from" value="<%= from != null ? from : "" %>">
       <input type="hidden" name="to" value="<%= to != null ? to : "" %>">

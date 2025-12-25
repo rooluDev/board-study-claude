@@ -336,7 +336,7 @@
     @SuppressWarnings("unchecked")
     List<Comment> comments = (List<Comment>) request.getAttribute("comments");
 
-    String page = (String) request.getAttribute("page");
+    String currentPage = (String) request.getAttribute("page");
     String category = (String) request.getAttribute("category");
     String from = (String) request.getAttribute("from");
     String to = (String) request.getAttribute("to");
@@ -346,8 +346,8 @@
 
     // 검색 조건 쿼리 문자열 생성
     StringBuilder queryString = new StringBuilder();
-    if (page != null && !page.isEmpty()) {
-      queryString.append("&page=").append(page);
+    if (currentPage != null && !currentPage.isEmpty()) {
+      queryString.append("&page=").append(currentPage);
     }
     if (category != null && !category.isEmpty()) {
       queryString.append("&category=").append(category);
