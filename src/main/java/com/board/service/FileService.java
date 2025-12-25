@@ -330,4 +330,45 @@ public class FileService {
       throw new FileUploadException("파일 업데이트 중 오류가 발생했습니다.", e);
     }
   }
+
+  /**
+   * 파일을 다운로드합니다.
+   * - 파일 정보 조회
+   * - 물리적 파일 존재 여부 확인
+   *
+   * @param fileId 파일 ID
+   * @return 파일 정보
+   * @throws FileUploadException 파일을 찾을 수 없거나 다운로드 중 오류 발생 시
+   */
+  public File downloadFile(Long fileId) {
+    logger.info("파일 다운로드 요청: fileId={}", fileId);
+
+    try {
+      // 파일 정보 조회
+      File file = fileDAO.selectFileById(fileId);
+
+      if (file == null) {
+        logger.warn("파일을 찾을 수 없음: fileId={}", fileId);
+        throw new FileUploadException("파일을 찾을 수 없습니다.");
+      }
+
+      // 물리적 파일 존재 여부 확인
+      java.io.File physicalFile = new java.io.File(file.getFilePath());
+      if (!physicalFile.exists()) {
+        logger.error("물리적 파일이 존재하지 않음: {}", file.getFilePath());
+        throw new FileUploadException("파일이 존재하지 않습니다.");
+      }
+
+      logger.info("파일 다운로드 준비 완료: fileId={}, originalName={}",
+          fileId, file.getOriginalName());
+
+      return file;
+
+    } catch (FileUploadException e) {
+      throw e;
+    } catch (Exception e) {
+      logger.error("파일 다운로드 실패: {}", e.getMessage(), e);
+      throw new FileUploadException("파일 다운로드 중 오류가 발생했습니다.", e);
+    }
+  }
 }
