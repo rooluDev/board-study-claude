@@ -1,28 +1,37 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page import="java.util.List" %>
+<%@ page import="com.example.board.dto.CategoryDTO" %>
+<%
+    List<CategoryDTO> categories = (List<CategoryDTO>) request.getAttribute("categories");
+    String error = (String) request.getAttribute("error");
+    String pageNum = request.getParameter("page");
+    if (pageNum == null) pageNum = "1";
+%>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>게시글 작성</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/style.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/resources/css/style.css">
 </head>
 <body>
     <div class="container">
         <h1>게시글 작성</h1>
 
-        <c:if test="${not empty error}">
-            <div class="error"><c:out value="${error}"/></div>
-        </c:if>
+        <% if (error != null && !error.isEmpty()) { %>
+            <div class="error"><%= error %></div>
+        <% } %>
 
-        <form action="${pageContext.request.contextPath}/board/post" method="post" enctype="multipart/form-data" id="postForm">
+        <form action="<%= request.getContextPath() %>/board/post" method="post" enctype="multipart/form-data" id="postForm">
             <div class="form-group">
                 <label>카테고리 *</label>
                 <select name="categoryId" required>
                     <option value="">선택</option>
-                    <c:forEach var="cat" items="${categories}">
-                        <option value="${cat.categoryId}"><c:out value="${cat.categoryName}"/></option>
-                    </c:forEach>
+                    <% if (categories != null) {
+                        for (CategoryDTO cat : categories) { %>
+                        <option value="<%= cat.getCategoryId() %>"><%= cat.getCategoryName() %></option>
+                    <% }
+                    } %>
                 </select>
             </div>
 
@@ -58,11 +67,11 @@
 
             <div class="actions">
                 <button type="submit" class="btn">등록</button>
-                <a href="${pageContext.request.contextPath}/boards?page=${page}" class="btn">취소</a>
+                <a href="<%= request.getContextPath() %>/boards?page=<%= pageNum %>" class="btn">취소</a>
             </div>
         </form>
     </div>
 
-    <script src="${pageContext.request.contextPath}/resources/js/validation.js"></script>
+    <script src="<%= request.getContextPath() %>/resources/js/validation.js"></script>
 </body>
 </html>

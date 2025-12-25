@@ -1,65 +1,83 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ page import="com.example.board.dto.BoardDTO" %>
+<%@ page import="com.example.board.dto.FileDTO" %>
+<%@ page import="com.example.board.dto.CommentDTO" %>
+<%
+    BoardDTO board = (BoardDTO) request.getAttribute("board");
+    String pageNum = request.getParameter("page");
+    String category = request.getParameter("category");
+    String from = request.getParameter("from");
+    String to = request.getParameter("to");
+    String keyword = request.getParameter("keyword");
+
+    if (pageNum == null) pageNum = "1";
+    if (category == null) category = "";
+    if (from == null) from = "";
+    if (to == null) to = "";
+    if (keyword == null) keyword = "";
+%>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title><c:out value="${board.title}"/></title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/style.css">
+    <title><%= board != null ? board.getTitle() : "게시글 보기" %></title>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/resources/css/style.css">
 </head>
 <body>
     <div class="container">
-        <h1><c:out value="${board.title}"/></h1>
+        <% if (board != null) { %>
+        <h1><%= board.getTitle() %></h1>
 
         <div class="board-info">
-            <span>작성자: <c:out value="${board.userName}"/></span>
-            <span>조회수: ${board.views}</span>
-            <span>등록일: <c:out value="${board.formattedCreatedAt}"/></span>
-            <c:if test="${board.editedAt != null}">
-                <span>수정일: <c:out value="${board.formattedEditedAt}"/></span>
-            </c:if>
+            <span>작성자: <%= board.getUserName() %></span>
+            <span>조회수: <%= board.getViews() %></span>
+            <span>등록일: <%= board.getFormattedCreatedAt() %></span>
+            <% if (board.getEditedAt() != null) { %>
+                <span>수정일: <%= board.getFormattedEditedAt() %></span>
+            <% } %>
         </div>
 
         <div class="board-content">
-            <c:out value="${board.content}" escapeXml="false"/>
+            <%= board.getContent() %>
         </div>
 
         <!-- 첨부파일 -->
-        <c:if test="${not empty board.files}">
+        <% if (board.getFiles() != null && !board.getFiles().isEmpty()) { %>
             <div class="attachments">
                 <h3>첨부파일</h3>
                 <ul>
-                    <c:forEach var="file" items="${board.files}">
+                    <% for (FileDTO file : board.getFiles()) { %>
                         <li>
-                            <a href="${pageContext.request.contextPath}/download?fileId=${file.fileId}">
-                                <c:out value="${file.originalName}"/> (${file.size} bytes)
+                            <a href="<%= request.getContextPath() %>/download?fileId=<%= file.getFileId() %>">
+                                <%= file.getOriginalName() %> (<%= file.getSize() %> bytes)
                             </a>
                         </li>
-                    </c:forEach>
+                    <% } %>
                 </ul>
             </div>
-        </c:if>
+        <% } %>
 
         <!-- 댓글 -->
         <div class="comments">
-            <h3>댓글 (${board.comments.size()})</h3>
+            <h3>댓글 (<%= board.getComments() != null ? board.getComments().size() : 0 %>)</h3>
             <ul>
-                <c:forEach var="comment" items="${board.comments}">
+                <% if (board.getComments() != null) {
+                    for (CommentDTO comment : board.getComments()) { %>
                     <li>
                         <div class="comment-date">
-                            <c:out value="${comment.formattedCreatedAt}"/>
+                            <%= comment.getFormattedCreatedAt() %>
                         </div>
                         <div class="comment-content">
-                            <c:out value="${comment.comment}"/>
+                            <%= comment.getComment() %>
                         </div>
                     </li>
-                </c:forEach>
+                <% }
+                } %>
             </ul>
 
             <!-- 댓글 등록 폼 -->
             <form id="commentForm">
-                <input type="hidden" name="boardId" value="${board.boardId}">
+                <input type="hidden" name="boardId" value="<%= board.getBoardId() %>">
                 <textarea name="content" placeholder="댓글을 입력하세요 (1-300자)" maxlength="300" required></textarea>
                 <button type="submit">댓글 등록</button>
             </form>
@@ -67,10 +85,13 @@
 
         <!-- 버튼 -->
         <div class="actions">
-            <a href="${pageContext.request.contextPath}/boards?page=${page}&category=${category}&from=${from}&to=${to}&keyword=${keyword}" class="btn">목록</a>
+            <a href="<%= request.getContextPath() %>/boards?page=<%= pageNum %>&category=<%= category %>&from=<%= from %>&to=<%= to %>&keyword=<%= keyword %>" class="btn">목록</a>
             <button onclick="showEditModal()" class="btn">수정</button>
             <button onclick="showDeleteModal()" class="btn btn-danger">삭제</button>
         </div>
+        <% } else { %>
+            <p>게시글을 찾을 수 없습니다.</p>
+        <% } %>
     </div>
 
     <!-- 비밀번호 모달 (수정) -->
@@ -94,10 +115,10 @@
     </div>
 
     <script>
-        const contextPath = '${pageContext.request.contextPath}';
-        const boardId = ${board.boardId};
+        const contextPath = '<%= request.getContextPath() %>';
+        const boardId = <%= board != null ? board.getBoardId() : 0 %>;
     </script>
-    <script src="${pageContext.request.contextPath}/resources/js/board.js"></script>
-    <script src="${pageContext.request.contextPath}/resources/js/validation.js"></script>
+    <script src="<%= request.getContextPath() %>/resources/js/board.js"></script>
+    <script src="<%= request.getContextPath() %>/resources/js/validation.js"></script>
 </body>
 </html>

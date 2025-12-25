@@ -20,9 +20,6 @@ dependencies {
     providedCompile 'jakarta.servlet:jakarta.servlet-api:5.0.0'
     providedCompile 'jakarta.servlet.jsp:jakarta.servlet.jsp-api:3.0.0'
 
-    // JSTL
-    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:2.0.0'
-
     // MyBatis
     implementation 'org.mybatis:mybatis:3.5.13'
 
