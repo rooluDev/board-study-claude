@@ -80,11 +80,7 @@
     <mapper resource="mapper/BoardMapper.xml"/>
     <mapper resource="mapper/FileMapper.xml"/>
     <mapper resource="mapper/CommentMapper.xml"/>
-
-    <!-- 향후 추가 예정 -->
-    <!--
     <mapper resource="mapper/CategoryMapper.xml"/>
-    -->
   </mappers>
 
 </configuration>

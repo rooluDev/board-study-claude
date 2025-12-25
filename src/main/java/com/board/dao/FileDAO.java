@@ -39,4 +39,69 @@ public class FileDAO {
       throw new BoardException("첨부파일 목록을 조회하는 중 오류가 발생했습니다.", e);
     }
   }
+
+  /**
+   * 단일 첨부파일을 등록합니다.
+   * 등록 후 생성된 fileId가 File 객체에 설정됩니다.
+   *
+   * @param file 등록할 파일 정보
+   * @throws BoardException 데이터베이스 삽입 중 오류 발생 시
+   */
+  public void insertFile(File file) {
+    logger.debug("첨부파일 등록: originalName={}, boardId={}",
+        file.getOriginalName(), file.getBoardId());
+
+    try (SqlSession session = MyBatisUtil.openSession()) {
+      int affectedRows = session.insert("com.board.dao.FileDAO.insertFile", file);
+
+      if (affectedRows > 0) {
+        session.commit();
+        logger.info("첨부파일 등록 완료: fileId={}, originalName={}",
+            file.getFileId(), file.getOriginalName());
+      } else {
+        logger.error("첨부파일 등록 실패: affectedRows=0");
+        throw new BoardException("첨부파일 등록에 실패했습니다.");
+      }
+
+    } catch (BoardException e) {
+      throw e;
+    } catch (Exception e) {
+      logger.error("첨부파일 등록 실패: {}", e.getMessage(), e);
+      throw new BoardException("첨부파일을 등록하는 중 오류가 발생했습니다.", e);
+    }
+  }
+
+  /**
+   * 여러 첨부파일을 배치로 등록합니다.
+   * 성능 최적화를 위해 단일 쿼리로 여러 파일을 삽입합니다.
+   *
+   * @param files 등록할 파일 목록
+   * @throws BoardException 데이터베이스 삽입 중 오류 발생 시
+   */
+  public void insertFiles(List<File> files) {
+    if (files == null || files.isEmpty()) {
+      logger.debug("등록할 파일이 없음");
+      return;
+    }
+
+    logger.debug("첨부파일 배치 등록: {} 건", files.size());
+
+    try (SqlSession session = MyBatisUtil.openSession()) {
+      int affectedRows = session.insert("com.board.dao.FileDAO.insertFiles", files);
+
+      if (affectedRows > 0) {
+        session.commit();
+        logger.info("첨부파일 배치 등록 완료: {} 건", affectedRows);
+      } else {
+        logger.error("첨부파일 배치 등록 실패: affectedRows=0");
+        throw new BoardException("첨부파일 배치 등록에 실패했습니다.");
+      }
+
+    } catch (BoardException e) {
+      throw e;
+    } catch (Exception e) {
+      logger.error("첨부파일 배치 등록 실패: {}", e.getMessage(), e);
+      throw new BoardException("첨부파일을 등록하는 중 오류가 발생했습니다.", e);
+    }
+  }
 }

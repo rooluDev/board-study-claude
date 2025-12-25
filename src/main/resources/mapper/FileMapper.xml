@@ -57,4 +57,63 @@
     ORDER BY created_at ASC
   </select>
 
+  <!-- ========================================
+       첨부파일 등록
+       ======================================== -->
+
+  <!--
+    단일 첨부파일 등록
+    생성된 fileId를 반환 (useGeneratedKeys)
+
+    @param file 파일 정보
+  -->
+  <insert id="insertFile" parameterType="File" useGeneratedKeys="true" keyProperty="fileId">
+    INSERT INTO file (
+      board_id,
+      original_name,
+      physical_name,
+      file_path,
+      extension,
+      size,
+      created_at
+    ) VALUES (
+      #{boardId},
+      #{originalName},
+      #{physicalName},
+      #{filePath},
+      #{extension},
+      #{size},
+      CURRENT_TIMESTAMP
+    )
+  </insert>
+
+  <!--
+    다중 첨부파일 배치 등록
+    여러 파일을 한 번에 삽입 (성능 최적화)
+
+    @param files 파일 목록
+  -->
+  <insert id="insertFiles" parameterType="java.util.List">
+    INSERT INTO file (
+      board_id,
+      original_name,
+      physical_name,
+      file_path,
+      extension,
+      size,
+      created_at
+    ) VALUES
+    <foreach collection="list" item="file" separator=",">
+      (
+        #{file.boardId},
+        #{file.originalName},
+        #{file.physicalName},
+        #{file.filePath},
+        #{file.extension},
+        #{file.size},
+        CURRENT_TIMESTAMP
+      )
+    </foreach>
+  </insert>
+
 </mapper>

@@ -127,4 +127,35 @@ public class BoardDAO {
       throw new BoardException("조회수를 증가시키는 중 오류가 발생했습니다.", e);
     }
   }
+
+  /**
+   * 새로운 게시글을 등록합니다.
+   * 비밀번호는 SHA2(256)로 해싱되어 저장됩니다.
+   * 등록 후 생성된 boardId가 Board 객체에 설정됩니다.
+   *
+   * @param board 등록할 게시글 정보
+   * @throws BoardException 데이터베이스 삽입 중 오류 발생 시
+   */
+  public void insertBoard(Board board) {
+    logger.debug("게시글 등록: title={}, userName={}, categoryId={}",
+        board.getTitle(), board.getUserName(), board.getCategoryId());
+
+    try (SqlSession session = MyBatisUtil.openSession()) {
+      int affectedRows = session.insert("com.board.dao.BoardDAO.insertBoard", board);
+
+      if (affectedRows > 0) {
+        session.commit();
+        logger.info("게시글 등록 완료: boardId={}, title={}", board.getBoardId(), board.getTitle());
+      } else {
+        logger.error("게시글 등록 실패: affectedRows=0");
+        throw new BoardException("게시글 등록에 실패했습니다.");
+      }
+
+    } catch (BoardException e) {
+      throw e;
+    } catch (Exception e) {
+      logger.error("게시글 등록 실패: {}", e.getMessage(), e);
+      throw new BoardException("게시글을 등록하는 중 오류가 발생했습니다.", e);
+    }
+  }
 }

@@ -131,4 +131,35 @@
     WHERE board_id = #{boardId}
   </update>
 
+  <!-- ========================================
+       게시글 등록
+       ======================================== -->
+
+  <!--
+    게시글 등록
+    비밀번호는 SHA2(256)로 해싱하여 저장
+    생성된 boardId를 반환 (useGeneratedKeys)
+
+    @param board 게시글 정보
+  -->
+  <insert id="insertBoard" parameterType="Board" useGeneratedKeys="true" keyProperty="boardId">
+    INSERT INTO board (
+      category_id,
+      title,
+      content,
+      user_name,
+      password,
+      views,
+      created_at
+    ) VALUES (
+      #{categoryId},
+      #{title},
+      #{content},
+      #{userName},
+      SHA2(#{password}, 256),
+      0,
+      CURRENT_TIMESTAMP
+    )
+  </insert>
+
 </mapper>
