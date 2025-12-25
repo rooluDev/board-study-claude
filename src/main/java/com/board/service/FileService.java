@@ -164,4 +164,124 @@ public class FileService {
       }
     }
   }
+
+  /**
+   * 여러 파일을 삭제합니다.
+   * - DB에서 파일 정보 조회
+   * - 물리 파일 삭제
+   * - DB에서 파일 정보 삭제
+   *
+   * @param fileIds 삭제할 파일 ID 목록
+   * @throws FileUploadException 파일 삭제 중 오류 발생 시
+   */
+  public void deleteFiles(List<Long> fileIds) {
+    if (fileIds == null || fileIds.isEmpty()) {
+      logger.debug("삭제할 파일이 없음");
+      return;
+    }
+
+    logger.info("파일 삭제 시작: {} 건", fileIds.size());
+
+    List<String> deletedPaths = new ArrayList<>();
+
+    try {
+      // 각 파일 삭제
+      for (Long fileId : fileIds) {
+        // DB에서 파일 정보 조회
+        File file = fileDAO.selectFileById(fileId);
+
+        if (file != null) {
+          // 물리 파일 삭제
+          try {
+            Files.deleteIfExists(Paths.get(file.getFilePath()));
+            deletedPaths.add(file.getFilePath());
+            logger.debug("물리 파일 삭제 완료: {}", file.getFilePath());
+          } catch (Exception e) {
+            logger.warn("물리 파일 삭제 실패: {}", file.getFilePath(), e);
+            // 물리 파일 삭제 실패해도 계속 진행
+          }
+        }
+      }
+
+      // DB에서 파일 정보 삭제
+      fileDAO.deleteFilesByIds(fileIds);
+
+      logger.info("파일 삭제 완료: {} 건", fileIds.size());
+
+    } catch (Exception e) {
+      logger.error("파일 삭제 실패: {}", e.getMessage(), e);
+      throw new FileUploadException("파일 삭제 중 오류가 발생했습니다.", e);
+    }
+  }
+
+  /**
+   * 게시글 수정 시 파일을 업데이트합니다.
+   * - 기존 파일 삭제
+   * - 새 파일 업로드
+   * - 총 파일 개수 검증 (최대 3개)
+   *
+   * @param boardId 게시글 ID
+   * @param newFiles 새로 추가할 파일 Part 목록
+   * @param deletedFileIds 삭제할 기존 파일 ID 목록
+   * @throws FileUploadException 파일 업데이트 중 오류 발생 시
+   */
+  public void updateFiles(Long boardId, List<Part> newFiles, List<Long> deletedFileIds) {
+    logger.info("파일 업데이트 시작: boardId={}", boardId);
+
+    try {
+      // 현재 게시글의 파일 개수 조회
+      List<File> currentFiles = fileDAO.selectFilesByBoardId(boardId);
+      int currentFileCount = currentFiles.size();
+
+      logger.debug("현재 파일 개수: {}", currentFileCount);
+
+      // 삭제할 파일 개수 계산
+      int deleteCount = (deletedFileIds != null) ? deletedFileIds.size() : 0;
+
+      // 새로 추가할 파일 개수 계산 (빈 파일 제외)
+      int newFileCount = 0;
+      if (newFiles != null && !newFiles.isEmpty()) {
+        for (Part part : newFiles) {
+          String submittedFileName = part.getSubmittedFileName();
+          if (submittedFileName != null && !submittedFileName.trim().isEmpty()
+              && part.getSize() > 0) {
+            newFileCount++;
+          }
+        }
+      }
+
+      // 최종 파일 개수 계산: 현재 - 삭제 + 새 파일
+      int finalFileCount = currentFileCount - deleteCount + newFileCount;
+
+      logger.debug("파일 개수 계산: 현재={}, 삭제={}, 추가={}, 최종={}",
+          currentFileCount, deleteCount, newFileCount, finalFileCount);
+
+      // 총 파일 개수 검증 (최대 3개)
+      if (finalFileCount > Constants.MAX_FILE_COUNT) {
+        throw new FileUploadException(
+            String.format("파일은 최대 %d개까지 첨부할 수 있습니다. (현재: %d개, 삭제: %d개, 추가: %d개)",
+                Constants.MAX_FILE_COUNT, currentFileCount, deleteCount, newFileCount));
+      }
+
+      // 기존 파일 삭제
+      if (deletedFileIds != null && !deletedFileIds.isEmpty()) {
+        deleteFiles(deletedFileIds);
+        logger.info("기존 파일 삭제 완료: {} 건", deletedFileIds.size());
+      }
+
+      // 새 파일 업로드
+      if (newFiles != null && !newFiles.isEmpty()) {
+        uploadFiles(newFiles, boardId);
+        logger.info("새 파일 업로드 완료");
+      }
+
+      logger.info("파일 업데이트 완료: boardId={}", boardId);
+
+    } catch (FileUploadException e) {
+      throw e;
+    } catch (Exception e) {
+      logger.error("파일 업데이트 실패: {}", e.getMessage(), e);
+      throw new FileUploadException("파일 업데이트 중 오류가 발생했습니다.", e);
+    }
+  }
 }

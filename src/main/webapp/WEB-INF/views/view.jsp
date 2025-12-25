@@ -222,6 +222,110 @@
       color: #6c757d;
       font-size: 14px;
     }
+
+    /* 모달 스타일 */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal.show {
+      display: block;
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: 15% auto;
+      padding: 30px;
+      border: 1px solid #888;
+      border-radius: 8px;
+      width: 400px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+      margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+      font-size: 20px;
+      color: #333;
+      margin: 0;
+    }
+
+    .modal-body {
+      margin-bottom: 20px;
+    }
+
+    .modal-body label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #495057;
+    }
+
+    .modal-body input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .modal-body input[type="password"]:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    .modal-error {
+      color: #dc3545;
+      font-size: 13px;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .modal-error.show {
+      display: block;
+    }
+
+    .modal-footer {
+      text-align: right;
+    }
+
+    .modal-footer button {
+      padding: 10px 20px;
+      margin-left: 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .modal-btn-confirm {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .modal-btn-confirm:hover {
+      background-color: #0056b3;
+    }
+
+    .modal-btn-cancel {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    .modal-btn-cancel:hover {
+      background-color: #545b62;
+    }
   </style>
 </head>
 <body>
@@ -358,8 +462,26 @@
     <!-- 버튼 -->
     <div class="buttons">
       <a href="${pageContext.request.contextPath}/boards?dummy=1<%= queryString %>" class="btn btn-primary">목록</a>
-      <a href="${pageContext.request.contextPath}/board/edit?boardId=<%= board.getBoardId() %><%= queryString %>" class="btn btn-warning">수정</a>
+      <button type="button" class="btn btn-warning" onclick="showPasswordModal()">수정</button>
       <button type="button" class="btn btn-danger" onclick="deleteBoard()">삭제</button>
+    </div>
+  </div>
+
+  <!-- 비밀번호 확인 모달 -->
+  <div id="passwordModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>비밀번호 확인</h2>
+      </div>
+      <div class="modal-body">
+        <label for="modalPassword">게시글 수정을 위해 비밀번호를 입력하세요:</label>
+        <input type="password" id="modalPassword" placeholder="비밀번호 입력" maxlength="12">
+        <div class="modal-error" id="modalError"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="modal-btn-confirm" onclick="confirmPassword()">확인</button>
+        <button type="button" class="modal-btn-cancel" onclick="closePasswordModal()">취소</button>
+      </div>
     </div>
   </div>
 
@@ -377,6 +499,104 @@
   %>
 
   <script>
+    // 비밀번호 확인 모달 열기
+    function showPasswordModal() {
+      const modal = document.getElementById('passwordModal');
+      const passwordInput = document.getElementById('modalPassword');
+      const errorDiv = document.getElementById('modalError');
+
+      // 초기화
+      passwordInput.value = '';
+      errorDiv.textContent = '';
+      errorDiv.classList.remove('show');
+
+      // 모달 표시
+      modal.classList.add('show');
+
+      // 비밀번호 입력 필드에 포커스
+      setTimeout(() => passwordInput.focus(), 100);
+    }
+
+    // 비밀번호 확인 모달 닫기
+    function closePasswordModal() {
+      const modal = document.getElementById('passwordModal');
+      modal.classList.remove('show');
+    }
+
+    // 비밀번호 확인
+    function confirmPassword() {
+      const passwordInput = document.getElementById('modalPassword');
+      const errorDiv = document.getElementById('modalError');
+      const password = passwordInput.value.trim();
+
+      // 비밀번호 입력 여부 확인
+      if (password.length === 0) {
+        errorDiv.textContent = '비밀번호를 입력해주세요.';
+        errorDiv.classList.add('show');
+        passwordInput.focus();
+        return;
+      }
+
+      // 오류 메시지 숨김
+      errorDiv.classList.remove('show');
+
+      // AJAX로 비밀번호 확인
+      const boardId = <%= board.getBoardId() %>;
+      const requestData = {
+        boardId: boardId,
+        password: password
+      };
+
+      fetch('<%= request.getContextPath() %>/auth/confirm', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // 비밀번호 확인 성공 - 수정 페이지로 이동
+          const queryString = '<%= queryString %>';
+          window.location.href = '<%= request.getContextPath() %>/board/edit?boardId=' + boardId + queryString;
+        } else {
+          // 비밀번호 불일치
+          errorDiv.textContent = data.message;
+          errorDiv.classList.add('show');
+          passwordInput.value = '';
+          passwordInput.focus();
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        errorDiv.textContent = '비밀번호 확인 중 오류가 발생했습니다.';
+        errorDiv.classList.add('show');
+      });
+    }
+
+    // 엔터 키로 비밀번호 확인
+    document.addEventListener('DOMContentLoaded', function() {
+      const passwordInput = document.getElementById('modalPassword');
+      if (passwordInput) {
+        passwordInput.addEventListener('keypress', function(event) {
+          if (event.key === 'Enter') {
+            confirmPassword();
+          }
+        });
+      }
+
+      // 모달 외부 클릭 시 닫기
+      const modal = document.getElementById('passwordModal');
+      if (modal) {
+        modal.addEventListener('click', function(event) {
+          if (event.target === modal) {
+            closePasswordModal();
+          }
+        });
+      }
+    });
+
     function deleteBoard() {
       if (confirm('정말 삭제하시겠습니까?')) {
         // TODO: 비밀번호 확인 모달 표시 후 삭제 처리

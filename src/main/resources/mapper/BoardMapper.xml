@@ -162,4 +162,43 @@
     )
   </insert>
 
+  <!-- ========================================
+       비밀번호 확인
+       ======================================== -->
+
+  <!--
+    게시글 비밀번호 확인
+    수정/삭제 전 작성자 확인에 사용
+    SHA2(256)로 해싱하여 비교
+
+    @param boardId 게시글 ID
+    @param password 입력한 비밀번호
+    @return 일치하면 1, 불일치하면 0
+  -->
+  <select id="checkPassword" resultType="int">
+    SELECT COUNT(*)
+    FROM board
+    WHERE board_id = #{boardId}
+      AND password = SHA2(#{password}, 256)
+  </select>
+
+  <!-- ========================================
+       게시글 수정
+       ======================================== -->
+
+  <!--
+    게시글 수정
+    제목, 내용만 수정 가능
+    edited_at 자동 갱신
+
+    @param board 수정할 게시글 정보 (boardId, title, content)
+  -->
+  <update id="updateBoard" parameterType="Board">
+    UPDATE board
+    SET title = #{title},
+        content = #{content},
+        edited_at = CURRENT_TIMESTAMP
+    WHERE board_id = #{boardId}
+  </update>
+
 </mapper>

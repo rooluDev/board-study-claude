@@ -104,4 +104,88 @@ public class FileDAO {
       throw new BoardException("첨부파일을 등록하는 중 오류가 발생했습니다.", e);
     }
   }
+
+  /**
+   * 파일 ID로 파일 정보를 조회합니다.
+   * 삭제 전 물리 파일명 확인에 사용
+   *
+   * @param fileId 파일 ID
+   * @return 파일 정보 (없으면 null)
+   * @throws BoardException 데이터베이스 조회 중 오류 발생 시
+   */
+  public File selectFileById(Long fileId) {
+    logger.debug("파일 정보 조회: fileId={}", fileId);
+
+    try (SqlSession session = MyBatisUtil.openSession()) {
+      File file = session.selectOne("com.board.dao.FileDAO.selectFileById", fileId);
+
+      if (file != null) {
+        logger.info("파일 정보 조회 완료: fileId={}, originalName={}",
+            fileId, file.getOriginalName());
+      } else {
+        logger.warn("파일을 찾을 수 없음: fileId={}", fileId);
+      }
+
+      return file;
+
+    } catch (Exception e) {
+      logger.error("파일 정보 조회 실패: {}", e.getMessage(), e);
+      throw new BoardException("파일 정보를 조회하는 중 오류가 발생했습니다.", e);
+    }
+  }
+
+  /**
+   * 단일 파일을 삭제합니다.
+   *
+   * @param fileId 파일 ID
+   * @throws BoardException 데이터베이스 삭제 중 오류 발생 시
+   */
+  public void deleteFile(Long fileId) {
+    logger.debug("파일 삭제: fileId={}", fileId);
+
+    try (SqlSession session = MyBatisUtil.openSession()) {
+      int affectedRows = session.delete("com.board.dao.FileDAO.deleteFile", fileId);
+
+      if (affectedRows > 0) {
+        session.commit();
+        logger.info("파일 삭제 완료: fileId={}", fileId);
+      } else {
+        logger.warn("파일 삭제 실패 (파일 없음): fileId={}", fileId);
+      }
+
+    } catch (Exception e) {
+      logger.error("파일 삭제 실패: {}", e.getMessage(), e);
+      throw new BoardException("파일을 삭제하는 중 오류가 발생했습니다.", e);
+    }
+  }
+
+  /**
+   * 여러 파일을 삭제합니다.
+   *
+   * @param fileIds 파일 ID 목록
+   * @throws BoardException 데이터베이스 삭제 중 오류 발생 시
+   */
+  public void deleteFilesByIds(List<Long> fileIds) {
+    if (fileIds == null || fileIds.isEmpty()) {
+      logger.debug("삭제할 파일이 없음");
+      return;
+    }
+
+    logger.debug("파일 배치 삭제: {} 건", fileIds.size());
+
+    try (SqlSession session = MyBatisUtil.openSession()) {
+      int affectedRows = session.delete("com.board.dao.FileDAO.deleteFilesByIds", fileIds);
+
+      if (affectedRows > 0) {
+        session.commit();
+        logger.info("파일 배치 삭제 완료: {} 건", affectedRows);
+      } else {
+        logger.warn("파일 배치 삭제 실패: 삭제된 파일이 없음");
+      }
+
+    } catch (Exception e) {
+      logger.error("파일 배치 삭제 실패: {}", e.getMessage(), e);
+      throw new BoardException("파일을 삭제하는 중 오류가 발생했습니다.", e);
+    }
+  }
 }

@@ -116,4 +116,59 @@
     </foreach>
   </insert>
 
+  <!-- ========================================
+       파일 ID로 조회
+       ======================================== -->
+
+  <!--
+    파일 ID로 파일 정보 조회
+    삭제 전 물리 파일명 확인에 사용
+
+    @param fileId 파일 ID
+    @return 파일 정보
+  -->
+  <select id="selectFileById" resultMap="FileResultMap">
+    SELECT
+      file_id,
+      board_id,
+      original_name,
+      physical_name,
+      file_path,
+      extension,
+      size,
+      created_at,
+      edited_at
+    FROM file
+    WHERE file_id = #{fileId}
+  </select>
+
+  <!-- ========================================
+       파일 삭제
+       ======================================== -->
+
+  <!--
+    단일 파일 삭제
+    물리 파일 삭제 후 호출
+
+    @param fileId 파일 ID
+  -->
+  <delete id="deleteFile">
+    DELETE FROM file
+    WHERE file_id = #{fileId}
+  </delete>
+
+  <!--
+    여러 파일 삭제
+    물리 파일 삭제 후 호출
+
+    @param fileIds 파일 ID 목록
+  -->
+  <delete id="deleteFilesByIds" parameterType="java.util.List">
+    DELETE FROM file
+    WHERE file_id IN
+    <foreach collection="list" item="fileId" open="(" separator="," close=")">
+      #{fileId}
+    </foreach>
+  </delete>
+
 </mapper>

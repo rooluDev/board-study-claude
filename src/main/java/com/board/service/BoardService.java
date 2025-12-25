@@ -2,6 +2,7 @@ package com.board.service;
 
 import com.board.dao.BoardDAO;
 import com.board.dto.Board;
+import com.board.exception.AuthenticationException;
 import com.board.exception.BoardException;
 import com.board.exception.ValidationException;
 import com.board.util.Constants;
@@ -207,5 +208,95 @@ public class BoardService {
     ValidationUtil.validatePassword(board.getPassword());
 
     logger.debug("게시글 입력값 검증 완료");
+  }
+
+  /**
+   * 게시글 비밀번호를 확인합니다.
+   * 비밀번호가 일치하지 않으면 AuthenticationException을 던집니다.
+   *
+   * @param boardId 게시글 ID
+   * @param password 확인할 비밀번호
+   * @throws ValidationException boardId 또는 password가 유효하지 않은 경우
+   * @throws AuthenticationException 비밀번호가 일치하지 않는 경우
+   */
+  public void checkPassword(Long boardId, String password) {
+    // boardId 검증
+    ValidationUtil.validateBoardId(boardId);
+
+    // 비밀번호 검증
+    if (password == null || password.trim().isEmpty()) {
+      throw new ValidationException("비밀번호를 입력해주세요.");
+    }
+
+    logger.info("비밀번호 확인 요청: boardId={}", boardId);
+
+    // DAO를 통해 비밀번호 확인
+    boolean isMatch = boardDAO.checkPassword(boardId, password);
+
+    if (!isMatch) {
+      logger.warn("비밀번호 불일치: boardId={}", boardId);
+      throw new AuthenticationException("비밀번호가 일치하지 않습니다.");
+    }
+
+    logger.info("비밀번호 확인 성공: boardId={}", boardId);
+  }
+
+  /**
+   * 게시글을 수정합니다.
+   * - 입력값 검증
+   * - 비밀번호 확인
+   * - 게시글 수정
+   * - 파일 업데이트
+   *
+   * @param board 수정할 게시글 정보 (boardId, title, content, password)
+   * @param newFiles 새로 추가할 파일 Part 목록
+   * @param deletedFileIds 삭제할 기존 파일 ID 목록
+   * @throws ValidationException 입력값 검증 실패 시
+   * @throws AuthenticationException 비밀번호 불일치 시
+   * @throws BoardException 게시글 수정 실패 시
+   */
+  public void updateBoard(Board board, List<Part> newFiles, List<Long> deletedFileIds) {
+    logger.info("게시글 수정 요청: boardId={}, title={}",
+        board.getBoardId(), board.getTitle());
+
+    // boardId 검증
+    ValidationUtil.validateBoardId(board.getBoardId());
+
+    // 제목, 내용 검증
+    ValidationUtil.validateTitle(board.getTitle());
+    ValidationUtil.validateContent(board.getContent());
+
+    // 비밀번호 확인
+    checkPassword(board.getBoardId(), board.getPassword());
+
+    try {
+      // 게시글 수정 (제목, 내용)
+      boardDAO.updateBoard(board);
+
+      logger.info("게시글 수정 완료: boardId={}", board.getBoardId());
+
+      // 파일 업데이트 (파일 변경사항이 있는 경우)
+      if ((deletedFileIds != null && !deletedFileIds.isEmpty())
+          || (newFiles != null && !newFiles.isEmpty())) {
+        try {
+          fileService.updateFiles(board.getBoardId(), newFiles, deletedFileIds);
+        } catch (Exception e) {
+          logger.error("파일 업데이트 실패: boardId={}, error={}",
+              board.getBoardId(), e.getMessage());
+          throw new BoardException("게시글은 수정되었으나 파일 업데이트에 실패했습니다: "
+              + e.getMessage(), e);
+        }
+      }
+
+      logger.info("게시글 수정 프로세스 완료: boardId={}", board.getBoardId());
+
+    } catch (AuthenticationException | ValidationException e) {
+      throw e;
+    } catch (BoardException e) {
+      throw e;
+    } catch (Exception e) {
+      logger.error("게시글 수정 실패: {}", e.getMessage(), e);
+      throw new BoardException("게시글 수정 중 오류가 발생했습니다.", e);
+    }
   }
 }

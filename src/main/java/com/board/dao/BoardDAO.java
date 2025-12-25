@@ -158,4 +158,64 @@ public class BoardDAO {
       throw new BoardException("게시글을 등록하는 중 오류가 발생했습니다.", e);
     }
   }
+
+  /**
+   * 게시글 비밀번호를 확인합니다.
+   * SHA2(256)로 해싱하여 비교
+   *
+   * @param boardId 게시글 ID
+   * @param password 확인할 비밀번호
+   * @return 비밀번호 일치 여부
+   * @throws BoardException 데이터베이스 조회 중 오류 발생 시
+   */
+  public boolean checkPassword(Long boardId, String password) {
+    logger.debug("비밀번호 확인: boardId={}", boardId);
+
+    try (SqlSession session = MyBatisUtil.openSession()) {
+      Map<String, Object> params = new HashMap<>();
+      params.put("boardId", boardId);
+      params.put("password", password);
+
+      Integer count = session.selectOne("com.board.dao.BoardDAO.checkPassword", params);
+
+      boolean isMatch = (count != null && count > 0);
+      logger.info("비밀번호 확인 결과: boardId={}, isMatch={}", boardId, isMatch);
+
+      return isMatch;
+
+    } catch (Exception e) {
+      logger.error("비밀번호 확인 실패: {}", e.getMessage(), e);
+      throw new BoardException("비밀번호 확인 중 오류가 발생했습니다.", e);
+    }
+  }
+
+  /**
+   * 게시글을 수정합니다.
+   * 제목, 내용만 수정 가능하며 edited_at이 자동으로 갱신됩니다.
+   *
+   * @param board 수정할 게시글 정보 (boardId, title, content)
+   * @throws BoardException 데이터베이스 업데이트 중 오류 발생 시
+   */
+  public void updateBoard(Board board) {
+    logger.debug("게시글 수정: boardId={}, title={}",
+        board.getBoardId(), board.getTitle());
+
+    try (SqlSession session = MyBatisUtil.openSession()) {
+      int affectedRows = session.update("com.board.dao.BoardDAO.updateBoard", board);
+
+      if (affectedRows > 0) {
+        session.commit();
+        logger.info("게시글 수정 완료: boardId={}", board.getBoardId());
+      } else {
+        logger.warn("게시글 수정 실패 (게시글 없음): boardId={}", board.getBoardId());
+        throw new BoardException("게시글을 찾을 수 없습니다.");
+      }
+
+    } catch (BoardException e) {
+      throw e;
+    } catch (Exception e) {
+      logger.error("게시글 수정 실패: {}", e.getMessage(), e);
+      throw new BoardException("게시글을 수정하는 중 오류가 발생했습니다.", e);
+    }
+  }
 }
