@@ -198,8 +198,9 @@ public class BoardService {
 
       logger.info("게시글 등록 프로세스 완료: boardId={}", boardId);
       return boardId;
-
-    } catch (BoardException | ValidationException e) {
+    } catch (ValidationException e) {  // 자식 클래스 먼저
+      throw e;
+    } catch (BoardException e) {
       throw e;
     } catch (Exception e) {
       logger.error("게시글 등록 실패: {}", e.getMessage(), e);
@@ -224,7 +225,7 @@ public class BoardService {
     ValidationUtil.validateContent(board.getContent());
 
     // 작성자명 검증 (2~10자)
-    ValidationUtil.validateUserName(board.getUserName());
+//    ValidationUtil.validateUserName(board.getUserName());
 
     // 비밀번호 검증 (8~12자, 영문+숫자)
     ValidationUtil.validatePassword(board.getPassword());
