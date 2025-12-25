@@ -1,6 +1,7 @@
 package com.board.service;
 
 import com.board.dao.BoardDAO;
+import com.board.dao.CommentDAO;
 import com.board.dto.Board;
 import com.board.exception.AuthenticationException;
 import com.board.exception.BoardException;
@@ -28,16 +29,22 @@ public class BoardService {
   private final BoardDAO boardDAO;
 
   /**
+   * CommentDAO 인스턴스
+   */
+  private final CommentDAO commentDAO;
+
+  /**
    * FileService 인스턴스
    */
   private final FileService fileService;
 
   /**
    * 기본 생성자
-   * BoardDAO와 FileService 인스턴스를 생성합니다.
+   * BoardDAO, CommentDAO, FileService 인스턴스를 생성합니다.
    */
   public BoardService() {
     this.boardDAO = new BoardDAO();
+    this.commentDAO = new CommentDAO();
     this.fileService = new FileService();
   }
 
@@ -297,6 +304,62 @@ public class BoardService {
     } catch (Exception e) {
       logger.error("게시글 수정 실패: {}", e.getMessage(), e);
       throw new BoardException("게시글 수정 중 오류가 발생했습니다.", e);
+    }
+  }
+
+  /**
+   * 게시글을 삭제합니다.
+   * - 비밀번호 확인
+   * - 관련 데이터 삭제 (댓글 → 파일 → 게시글 순서)
+   * - CASCADE 사용 안 함 (명시적 삭제)
+   *
+   * 삭제 순서:
+   * 1. 댓글 삭제 (CommentDAO)
+   * 2. 첨부파일 삭제 (FileService - 물리 파일 + DB)
+   * 3. 게시글 삭제 (BoardDAO)
+   *
+   * @param boardId 삭제할 게시글 ID
+   * @param password 게시글 비밀번호
+   * @throws ValidationException boardId 또는 password가 유효하지 않은 경우
+   * @throws AuthenticationException 비밀번호가 일치하지 않는 경우
+   * @throws BoardException 게시글 삭제 실패 시
+   */
+  public void deleteBoard(Long boardId, String password) {
+    logger.info("게시글 삭제 요청: boardId={}", boardId);
+
+    // boardId 검증
+    ValidationUtil.validateBoardId(boardId);
+
+    // 비밀번호 확인
+    checkPassword(boardId, password);
+
+    try {
+      // 1. 댓글 삭제
+      logger.debug("1단계: 댓글 삭제 시작 - boardId={}", boardId);
+      commentDAO.deleteCommentsByBoardId(boardId);
+      logger.info("댓글 삭제 완료: boardId={}", boardId);
+
+      // 2. 첨부파일 삭제 (물리 파일 + DB)
+      logger.debug("2단계: 첨부파일 삭제 시작 - boardId={}", boardId);
+      fileService.deleteAllFilesByBoardId(boardId);
+      logger.info("첨부파일 삭제 완료: boardId={}", boardId);
+
+      // 3. 게시글 삭제
+      logger.debug("3단계: 게시글 삭제 시작 - boardId={}", boardId);
+      boardDAO.deleteBoard(boardId);
+      logger.info("게시글 삭제 완료: boardId={}", boardId);
+
+      logger.info("게시글 삭제 프로세스 완료: boardId={}", boardId);
+
+    } catch (AuthenticationException | ValidationException e) {
+      throw e;
+    } catch (BoardException e) {
+      logger.error("게시글 삭제 실패: boardId={}, error={}", boardId, e.getMessage());
+      throw e;
+    } catch (Exception e) {
+      logger.error("게시글 삭제 중 예상치 못한 오류 발생: boardId={}, error={}",
+          boardId, e.getMessage(), e);
+      throw new BoardException("게시글 삭제 중 오류가 발생했습니다.", e);
     }
   }
 }

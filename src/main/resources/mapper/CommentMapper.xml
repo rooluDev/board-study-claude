@@ -49,4 +49,19 @@
     ORDER BY created_at ASC
   </select>
 
+  <!-- ========================================
+       게시글별 댓글 삭제
+       ======================================== -->
+
+  <!--
+    특정 게시글의 모든 댓글 삭제
+    게시글 삭제 시 사용 (CASCADE 대신 명시적 삭제)
+
+    @param boardId 게시글 ID
+  -->
+  <delete id="deleteCommentsByBoardId">
+    DELETE FROM comment
+    WHERE board_id = #{boardId}
+  </delete>
+
 </mapper>

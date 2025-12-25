@@ -218,4 +218,33 @@ public class BoardDAO {
       throw new BoardException("게시글을 수정하는 중 오류가 발생했습니다.", e);
     }
   }
+
+  /**
+   * 게시글을 삭제합니다.
+   * 댓글과 파일을 먼저 삭제한 후 호출해야 합니다 (CASCADE 사용 안 함)
+   *
+   * @param boardId 삭제할 게시글 ID
+   * @throws BoardException 데이터베이스 삭제 중 오류 발생 시
+   */
+  public void deleteBoard(Long boardId) {
+    logger.debug("게시글 삭제: boardId={}", boardId);
+
+    try (SqlSession session = MyBatisUtil.openSession()) {
+      int affectedRows = session.delete("com.board.dao.BoardDAO.deleteBoard", boardId);
+
+      if (affectedRows > 0) {
+        session.commit();
+        logger.info("게시글 삭제 완료: boardId={}", boardId);
+      } else {
+        logger.warn("게시글 삭제 실패 (게시글 없음): boardId={}", boardId);
+        throw new BoardException("게시글을 찾을 수 없습니다.");
+      }
+
+    } catch (BoardException e) {
+      throw e;
+    } catch (Exception e) {
+      logger.error("게시글 삭제 실패: {}", e.getMessage(), e);
+      throw new BoardException("게시글을 삭제하는 중 오류가 발생했습니다.", e);
+    }
+  }
 }

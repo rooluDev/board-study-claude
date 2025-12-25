@@ -201,4 +201,19 @@
     WHERE board_id = #{boardId}
   </update>
 
+  <!-- ========================================
+       게시글 삭제
+       ======================================== -->
+
+  <!--
+    게시글 삭제
+    댓글과 파일을 먼저 삭제한 후 호출 (CASCADE 사용 안 함)
+
+    @param boardId 게시글 ID
+  -->
+  <delete id="deleteBoard">
+    DELETE FROM board
+    WHERE board_id = #{boardId}
+  </delete>
+
 </mapper>

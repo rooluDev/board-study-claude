@@ -467,7 +467,7 @@
     </div>
   </div>
 
-  <!-- 비밀번호 확인 모달 -->
+  <!-- 수정 비밀번호 확인 모달 -->
   <div id="passwordModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -481,6 +481,24 @@
       <div class="modal-footer">
         <button type="button" class="modal-btn-confirm" onclick="confirmPassword()">확인</button>
         <button type="button" class="modal-btn-cancel" onclick="closePasswordModal()">취소</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 삭제 비밀번호 확인 모달 -->
+  <div id="deletePasswordModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>게시글 삭제</h2>
+      </div>
+      <div class="modal-body">
+        <label for="deleteModalPassword">게시글 삭제를 위해 비밀번호를 입력하세요:</label>
+        <input type="password" id="deleteModalPassword" placeholder="비밀번호 입력" maxlength="12">
+        <div class="modal-error" id="deleteModalError"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="modal-btn-confirm" onclick="confirmDeletePassword()">삭제</button>
+        <button type="button" class="modal-btn-cancel" onclick="closeDeletePasswordModal()">취소</button>
       </div>
     </div>
   </div>
@@ -575,8 +593,93 @@
       });
     }
 
+    // 삭제 비밀번호 확인 모달 열기
+    function showDeletePasswordModal() {
+      const modal = document.getElementById('deletePasswordModal');
+      const passwordInput = document.getElementById('deleteModalPassword');
+      const errorDiv = document.getElementById('deleteModalError');
+
+      // 초기화
+      passwordInput.value = '';
+      errorDiv.textContent = '';
+      errorDiv.classList.remove('show');
+
+      // 모달 표시
+      modal.classList.add('show');
+
+      // 비밀번호 입력 필드에 포커스
+      setTimeout(() => passwordInput.focus(), 100);
+    }
+
+    // 삭제 비밀번호 확인 모달 닫기
+    function closeDeletePasswordModal() {
+      const modal = document.getElementById('deletePasswordModal');
+      modal.classList.remove('show');
+    }
+
+    // 삭제 비밀번호 확인 및 삭제 처리
+    function confirmDeletePassword() {
+      const passwordInput = document.getElementById('deleteModalPassword');
+      const errorDiv = document.getElementById('deleteModalError');
+      const password = passwordInput.value.trim();
+
+      // 비밀번호 입력 여부 확인
+      if (password.length === 0) {
+        errorDiv.textContent = '비밀번호를 입력해주세요.';
+        errorDiv.classList.add('show');
+        passwordInput.focus();
+        return;
+      }
+
+      // 오류 메시지 숨김
+      errorDiv.classList.remove('show');
+
+      // AJAX로 게시글 삭제 요청
+      const boardId = <%= board.getBoardId() %>;
+      const requestData = {
+        boardId: boardId,
+        password: password
+      };
+
+      fetch('<%= request.getContextPath() %>/board/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // 삭제 성공 - 목록 페이지로 이동 (검색 조건 없이)
+          alert(data.message);
+          window.location.href = '<%= request.getContextPath() %>' + data.redirectUrl;
+        } else {
+          // 삭제 실패 (비밀번호 불일치 또는 기타 오류)
+          errorDiv.textContent = data.message;
+          errorDiv.classList.add('show');
+          passwordInput.value = '';
+          passwordInput.focus();
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        errorDiv.textContent = '게시글 삭제 중 오류가 발생했습니다.';
+        errorDiv.classList.add('show');
+      });
+    }
+
+    // 게시글 삭제 버튼 클릭
+    function deleteBoard() {
+      // 삭제 확인 후 비밀번호 모달 표시
+      if (confirm('정말 삭제하시겠습니까?')) {
+        showDeletePasswordModal();
+      }
+    }
+
     // 엔터 키로 비밀번호 확인
     document.addEventListener('DOMContentLoaded', function() {
+      // 수정 모달 엔터 키 처리
       const passwordInput = document.getElementById('modalPassword');
       if (passwordInput) {
         passwordInput.addEventListener('keypress', function(event) {
@@ -586,7 +689,17 @@
         });
       }
 
-      // 모달 외부 클릭 시 닫기
+      // 삭제 모달 엔터 키 처리
+      const deletePasswordInput = document.getElementById('deleteModalPassword');
+      if (deletePasswordInput) {
+        deletePasswordInput.addEventListener('keypress', function(event) {
+          if (event.key === 'Enter') {
+            confirmDeletePassword();
+          }
+        });
+      }
+
+      // 수정 모달 외부 클릭 시 닫기
       const modal = document.getElementById('passwordModal');
       if (modal) {
         modal.addEventListener('click', function(event) {
@@ -595,14 +708,17 @@
           }
         });
       }
-    });
 
-    function deleteBoard() {
-      if (confirm('정말 삭제하시겠습니까?')) {
-        // TODO: 비밀번호 확인 모달 표시 후 삭제 처리
-        alert('삭제 기능은 추후 구현 예정입니다.');
+      // 삭제 모달 외부 클릭 시 닫기
+      const deleteModal = document.getElementById('deletePasswordModal');
+      if (deleteModal) {
+        deleteModal.addEventListener('click', function(event) {
+          if (event.target === deleteModal) {
+            closeDeletePasswordModal();
+          }
+        });
       }
-    }
+    });
   </script>
 </body>
 </html>

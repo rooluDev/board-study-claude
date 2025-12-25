@@ -171,4 +171,15 @@
     </foreach>
   </delete>
 
+  <!--
+    게시글의 모든 파일 정보 삭제
+    게시글 삭제 시 사용 (CASCADE 대신 명시적 삭제)
+
+    @param boardId 게시글 ID
+  -->
+  <delete id="deleteFilesByBoardId">
+    DELETE FROM file
+    WHERE board_id = #{boardId}
+  </delete>
+
 </mapper>

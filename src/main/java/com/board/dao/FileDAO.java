@@ -188,4 +188,26 @@ public class FileDAO {
       throw new BoardException("파일을 삭제하는 중 오류가 발생했습니다.", e);
     }
   }
+
+  /**
+   * 특정 게시글의 모든 파일 정보를 삭제합니다.
+   * 게시글 삭제 시 사용 (CASCADE 대신 명시적 삭제)
+   *
+   * @param boardId 게시글 ID
+   * @throws BoardException 데이터베이스 삭제 중 오류 발생 시
+   */
+  public void deleteFilesByBoardId(Long boardId) {
+    logger.debug("파일 삭제: boardId={}", boardId);
+
+    try (SqlSession session = MyBatisUtil.openSession()) {
+      int affectedRows = session.delete("com.board.dao.FileDAO.deleteFilesByBoardId", boardId);
+
+      session.commit();
+      logger.info("파일 삭제 완료: boardId={}, 삭제된 파일 {} 건", boardId, affectedRows);
+
+    } catch (Exception e) {
+      logger.error("파일 삭제 실패: {}", e.getMessage(), e);
+      throw new BoardException("파일을 삭제하는 중 오류가 발생했습니다.", e);
+    }
+  }
 }

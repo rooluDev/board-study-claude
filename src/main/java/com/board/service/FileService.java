@@ -215,6 +215,52 @@ public class FileService {
   }
 
   /**
+   * 게시글의 모든 파일을 삭제합니다.
+   * 게시글 삭제 시 사용
+   * - DB에서 파일 목록 조회
+   * - 물리 파일 삭제
+   * - DB에서 파일 정보 삭제
+   *
+   * @param boardId 게시글 ID
+   * @throws FileUploadException 파일 삭제 중 오류 발생 시
+   */
+  public void deleteAllFilesByBoardId(Long boardId) {
+    logger.info("게시글 파일 전체 삭제 시작: boardId={}", boardId);
+
+    try {
+      // DB에서 파일 목록 조회
+      List<File> files = fileDAO.selectFilesByBoardId(boardId);
+
+      if (files.isEmpty()) {
+        logger.debug("삭제할 파일이 없음: boardId={}", boardId);
+        return;
+      }
+
+      logger.debug("삭제할 파일 개수: {} 건", files.size());
+
+      // 각 파일의 물리적 파일 삭제
+      for (File file : files) {
+        try {
+          Files.deleteIfExists(Paths.get(file.getFilePath()));
+          logger.debug("물리 파일 삭제 완료: {}", file.getFilePath());
+        } catch (Exception e) {
+          logger.warn("물리 파일 삭제 실패: {}", file.getFilePath(), e);
+          // 물리 파일 삭제 실패해도 계속 진행
+        }
+      }
+
+      // DB에서 파일 정보 삭제
+      fileDAO.deleteFilesByBoardId(boardId);
+
+      logger.info("게시글 파일 전체 삭제 완료: boardId={}, 삭제된 파일 {} 건", boardId, files.size());
+
+    } catch (Exception e) {
+      logger.error("게시글 파일 삭제 실패: {}", e.getMessage(), e);
+      throw new FileUploadException("파일 삭제 중 오류가 발생했습니다.", e);
+    }
+  }
+
+  /**
    * 게시글 수정 시 파일을 업데이트합니다.
    * - 기존 파일 삭제
    * - 새 파일 업로드
