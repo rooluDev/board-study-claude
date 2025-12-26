@@ -52,9 +52,10 @@ public class CommentService {
    * 댓글을 등록합니다.
    * - 입력값 검증
    * - 댓글 정보 DB 삽입
+   * - 생성된 댓글 다시 조회 (created_at 포함)
    *
    * @param comment 등록할 댓글 정보 (boardId, comment)
-   * @return 등록된 댓글 (생성된 commentId 포함)
+   * @return 등록된 댓글 (생성된 commentId, created_at 포함)
    * @throws ValidationException 입력값 검증 실패 시
    * @throws BoardException 댓글 등록 실패 시
    */
@@ -68,10 +69,13 @@ public class CommentService {
       // 댓글 DB 삽입
       commentDAO.insertComment(comment);
 
-      logger.info("댓글 등록 완료: commentId={}, boardId={}",
-          comment.getCommentId(), comment.getBoardId());
+      // 생성된 댓글 다시 조회 (created_at 값을 가져오기 위해)
+      Comment savedComment = commentDAO.selectCommentById(comment.getCommentId());
 
-      return comment;
+      logger.info("댓글 등록 완료: commentId={}, boardId={}",
+          savedComment.getCommentId(), savedComment.getBoardId());
+
+      return savedComment;
 
     } catch (ValidationException e) {
       throw e;

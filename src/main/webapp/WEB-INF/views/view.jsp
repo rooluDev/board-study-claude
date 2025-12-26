@@ -346,20 +346,32 @@
 
     // 검색 조건 쿼리 문자열 생성
     StringBuilder queryString = new StringBuilder();
+    boolean firstParam = true;
+
     if (currentPage != null && !currentPage.isEmpty()) {
-      queryString.append("&page=").append(currentPage);
+      queryString.append(firstParam ? "?" : "&").append("page=").append(currentPage);
+      firstParam = false;
     }
     if (category != null && !category.isEmpty()) {
-      queryString.append("&category=").append(category);
+      queryString.append(firstParam ? "?" : "&").append("category=").append(category);
+      firstParam = false;
     }
     if (from != null && !from.isEmpty()) {
-      queryString.append("&from=").append(from);
+      queryString.append(firstParam ? "?" : "&").append("from=").append(from);
+      firstParam = false;
     }
     if (to != null && !to.isEmpty()) {
-      queryString.append("&to=").append(to);
+      queryString.append(firstParam ? "?" : "&").append("to=").append(to);
+      firstParam = false;
     }
     if (keyword != null && !keyword.isEmpty()) {
-      queryString.append("&keyword=").append(keyword);
+      queryString.append(firstParam ? "?" : "&").append("keyword=").append(keyword);
+      firstParam = false;
+    }
+
+    // 파라미터가 하나도 없으면 빈 문자열
+    if (firstParam) {
+      queryString.append("");
     }
   %>
 
@@ -464,7 +476,7 @@
 
     <!-- 버튼 -->
     <div class="buttons">
-      <a href="${pageContext.request.contextPath}/boards?dummy=1<%= queryString %>" class="btn btn-primary">목록</a>
+      <a href="${pageContext.request.contextPath}/boards<%= queryString %>" class="btn btn-primary">목록</a>
       <button type="button" class="btn btn-warning" onclick="showPasswordModal()">수정</button>
       <button type="button" class="btn btn-danger" onclick="deleteBoard()">삭제</button>
     </div>

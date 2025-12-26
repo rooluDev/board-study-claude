@@ -50,6 +50,27 @@
   </select>
 
   <!-- ========================================
+       댓글 단건 조회
+       ======================================== -->
+
+  <!--
+    댓글 ID로 댓글 조회
+
+    @param commentId 댓글 ID
+    @return 댓글 정보
+  -->
+  <select id="selectCommentById" resultMap="CommentResultMap">
+    SELECT
+      comment_id,
+      board_id,
+      comment,
+      created_at,
+      edited_at
+    FROM comment
+    WHERE comment_id = #{commentId}
+  </select>
+
+  <!-- ========================================
        댓글 등록
        ======================================== -->
 

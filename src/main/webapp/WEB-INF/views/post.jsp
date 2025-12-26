@@ -170,6 +170,38 @@
       </div>
     <%
       }
+
+      // 검색 조건 받기
+      String category = request.getParameter("category");
+      String from = request.getParameter("from");
+      String to = request.getParameter("to");
+      String keyword = request.getParameter("keyword");
+
+      if (category == null) category = "";
+      if (from == null) from = "";
+      if (to == null) to = "";
+      if (keyword == null) keyword = "";
+
+      // 검색 조건 쿼리 문자열 생성
+      StringBuilder searchQuery = new StringBuilder();
+      boolean firstParam = true;
+
+      if (!category.isEmpty()) {
+        searchQuery.append(firstParam ? "?" : "&").append("category=").append(category);
+        firstParam = false;
+      }
+      if (!from.isEmpty()) {
+        searchQuery.append(firstParam ? "?" : "&").append("from=").append(from);
+        firstParam = false;
+      }
+      if (!to.isEmpty()) {
+        searchQuery.append(firstParam ? "?" : "&").append("to=").append(to);
+        firstParam = false;
+      }
+      if (!keyword.isEmpty()) {
+        searchQuery.append(firstParam ? "?" : "&").append("keyword=").append(keyword);
+        firstParam = false;
+      }
     %>
 
     <form id="postForm" action="<%= request.getContextPath() %>/board/post" method="post" enctype="multipart/form-data">
@@ -186,12 +218,12 @@
             String selectedCategoryId = (String) request.getAttribute("categoryId");
 
             if (categories != null) {
-              for (Category category : categories) {
+              for (Category cat : categories) {
                 boolean isSelected = selectedCategoryId != null &&
-                                   selectedCategoryId.equals(String.valueOf(category.getCategoryId()));
+                                   selectedCategoryId.equals(String.valueOf(cat.getCategoryId()));
           %>
-            <option value="<%= category.getCategoryId() %>" <%= isSelected ? "selected" : "" %>>
-              <%= category.getCategoryName() %>
+            <option value="<%= cat.getCategoryId() %>" <%= isSelected ? "selected" : "" %>>
+              <%= cat.getCategoryName() %>
             </option>
           <%
               }
@@ -448,7 +480,7 @@
     // 목록으로 돌아가기
     function goToList() {
       if (confirm('작성을 취소하시겠습니까?')) {
-        window.location.href = '<%= request.getContextPath() %>/boards';
+        window.location.href = '<%= request.getContextPath() %>/boards<%= searchQuery %>';
       }
     }
   </script>

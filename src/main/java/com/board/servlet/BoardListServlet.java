@@ -1,8 +1,10 @@
 package com.board.servlet;
 
 import com.board.dto.Board;
+import com.board.dto.Category;
 import com.board.exception.BoardException;
 import com.board.service.BoardService;
+import com.board.service.CategoryService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -30,13 +32,19 @@ public class BoardListServlet extends HttpServlet {
   private BoardService boardService;
 
   /**
+   * CategoryService 인스턴스
+   */
+  private CategoryService categoryService;
+
+  /**
    * Servlet 초기화
-   * BoardService 인스턴스를 생성합니다.
+   * BoardService 및 CategoryService 인스턴스를 생성합니다.
    */
   @Override
   public void init() throws ServletException {
     super.init();
     this.boardService = new BoardService();
+    this.categoryService = new CategoryService();
     logger.info("BoardListServlet 초기화 완료");
   }
 
@@ -65,6 +73,18 @@ public class BoardListServlet extends HttpServlet {
       String to = getSearchParameter(request, "to");
       String keyword = getSearchParameter(request, "keyword");
 
+      // from, to 기본값 설정 (파라미터가 없을 때만)
+      if (from == null) {
+        // 1년 전 날짜
+        java.time.LocalDate oneYearAgo = java.time.LocalDate.now().minusYears(1);
+        from = oneYearAgo.toString(); // yyyy-MM-dd 형식
+      }
+      if (to == null) {
+        // 현재 날짜
+        java.time.LocalDate today = java.time.LocalDate.now();
+        to = today.toString(); // yyyy-MM-dd 형식
+      }
+
       logger.debug("검색 조건 - page: {}, category: {}, from: {}, to: {}, keyword: {}",
           page, category, from, to, keyword);
 
@@ -77,11 +97,15 @@ public class BoardListServlet extends HttpServlet {
       // 전체 게시글 수 조회 (검색 조건 포함)
       int totalCount = boardService.getTotalCount(category, from, to, keyword);
 
+      // 카테고리 목록 조회 (검색 폼용)
+      List<Category> categories = categoryService.getAllCategories();
+
       // request attribute 설정 (JSP에서 사용)
       request.setAttribute("boards", boards);
       request.setAttribute("currentPage", page);
       request.setAttribute("totalPages", totalPages);
       request.setAttribute("totalCount", totalCount);
+      request.setAttribute("categories", categories);
 
       // 검색 조건을 request attribute로 설정 (JSP에서 검색 폼 유지용)
       request.setAttribute("category", category != null ? String.valueOf(category) : "");

@@ -76,7 +76,7 @@ CREATE TABLE file (
   board_id BIGINT NOT NULL COMMENT '게시글 ID',
   original_name VARCHAR(100) NOT NULL COMMENT '원본 파일명',
   physical_name VARCHAR(100) NOT NULL COMMENT '서버 저장 파일명 (UUID)',
-  file_path VARCHAR(15) NOT NULL COMMENT '저장 경로',
+  file_path VARCHAR(500) NOT NULL COMMENT '저장 경로',
   extension VARCHAR(10) NOT NULL COMMENT '확장자',
   size BIGINT NOT NULL COMMENT '파일 크기 (bytes)',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '등록일시',

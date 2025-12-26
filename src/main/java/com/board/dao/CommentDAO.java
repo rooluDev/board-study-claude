@@ -42,6 +42,36 @@ public class CommentDAO {
   }
 
   /**
+   * 댓글 ID로 댓글을 조회합니다.
+   *
+   * @param commentId 댓글 ID
+   * @return 댓글 정보
+   * @throws BoardException 데이터베이스 조회 중 오류 발생 시
+   */
+  public Comment selectCommentById(Long commentId) {
+    logger.debug("댓글 조회: commentId={}", commentId);
+
+    try (SqlSession session = MyBatisUtil.openSession()) {
+      Comment comment = session.selectOne(
+          "com.board.dao.CommentDAO.selectCommentById", commentId);
+
+      if (comment == null) {
+        logger.warn("댓글을 찾을 수 없음: commentId={}", commentId);
+        throw new BoardException("댓글을 찾을 수 없습니다.");
+      }
+
+      logger.info("댓글 조회 완료: commentId={}", commentId);
+      return comment;
+
+    } catch (BoardException e) {
+      throw e;
+    } catch (Exception e) {
+      logger.error("댓글 조회 실패: {}", e.getMessage(), e);
+      throw new BoardException("댓글을 조회하는 중 오류가 발생했습니다.", e);
+    }
+  }
+
+  /**
    * 댓글을 등록합니다.
    * 등록 후 생성된 commentId가 Comment 객체에 설정됩니다.
    *
