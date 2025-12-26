@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+  Category 테이블 MyBatis Mapper
+
+  네임스페이스: com.board.dao.CategoryDAO
+  설명: 카테고리 관련 SQL 쿼리 정의
+-->
+<mapper namespace="com.board.dao.CategoryDAO">
+
+  <!-- Category 결과 매핑 -->
+  <resultMap id="CategoryResultMap" type="Category">
+    <id property="categoryId" column="category_id"/>
+    <result property="categoryName" column="category_name"/>
+  </resultMap>
+
+  <!--
+    전체 카테고리 목록 조회
+
+    반환: List<Category>
+    정렬: category_id 오름차순
+  -->
+  <select id="selectAllCategories" resultMap="CategoryResultMap">
+    SELECT
+      category_id,
+      category_name
+    FROM category
+    ORDER BY category_id ASC
+  </select>
+
+  <!--
+    카테고리 ID로 카테고리 조회
+
+    파라미터:
+    - categoryId: 카테고리 ID
+
+    반환: Category
+  -->
+  <select id="selectCategoryById" resultMap="CategoryResultMap">
+    SELECT
+      category_id,
+      category_name
+    FROM category
+    WHERE category_id = #{categoryId}
+  </select>
+
+  <!--
+    카테고리 등록
+
+    파라미터:
+    - categoryName: 카테고리 이름
+
+    반환: 생성된 카테고리 ID (useGeneratedKeys)
+  -->
+  <insert id="insertCategory" useGeneratedKeys="true" keyProperty="categoryId">
+    INSERT INTO category (
+      category_name
+    ) VALUES (
+      #{categoryName}
+    )
+  </insert>
+
+  <!--
+    카테고리 수정
+
+    파라미터:
+    - categoryId: 카테고리 ID
+    - categoryName: 카테고리 이름
+  -->
+  <update id="updateCategory">
+    UPDATE category
+    SET category_name = #{categoryName}
+    WHERE category_id = #{categoryId}
+  </update>
+
+  <!--
+    카테고리 삭제
+
+    파라미터:
+    - categoryId: 카테고리 ID
+  -->
+  <delete id="deleteCategory">
+    DELETE FROM category
+    WHERE category_id = #{categoryId}
+  </delete>
+
+</mapper>

@@ -1,311 +1,211 @@
-# Java Coding Convention
+# Java 코딩 컨벤션
 
-> 본 프로젝트는 [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html)를 기반으로 합니다.
-
-## 목차
-
-1. [소스 파일 기본사항](#1-소스-파일-기본사항)
-2. [소스 파일 구조](#2-소스-파일-구조)
-3. [포매팅](#3-포매팅)
-4. [명명 규칙](#4-명명-규칙)
-5. [프로그래밍 관례](#5-프로그래밍-관례)
-6. [Javadoc](#6-javadoc)
-7. [프로젝트 특화 규칙](#7-프로젝트-특화-규칙)
-
----
+본 문서는 Google Java Style Guide를 기반으로 작성되었으며, 프로젝트 특성에 맞게 일부 수정되었습니다.
 
 ## 1. 소스 파일 기본사항
 
-### 1.1 파일 이름
+### 1.1 파일 인코딩
+- **UTF-8** 사용
 
-- 소스 파일 이름은 최상위 클래스 이름 + `.java` 확장자로 구성됩니다.
-- 대소문자를 구분합니다.
-
-```java
-// 파일명: BoardController.java
-public class BoardController {
-    // ...
-}
-```
-
-### 1.2 파일 인코딩
-
-- **UTF-8** 인코딩을 사용합니다.
-
-### 1.3 특수 문자
-
-#### 1.3.1 공백 문자
-
-- 줄바꿈 문자를 제외하고, **ASCII 공백 문자(0x20)**만 사용합니다.
-- **탭 문자는 들여쓰기에 사용하지 않습니다.**
-
-#### 1.3.2 이스케이프 시퀀스
-
-- 특수 이스케이프 시퀀스가 있는 문자(`\b`, `\t`, `\n`, `\f`, `\r`, `\"`, `\'`, `\\`)는 8진수나 유니코드 대신 이스케이프 시퀀스를 사용합니다.
-
-```java
-// Good
-String newline = "first line\nsecond line";
-
-// Bad
-String newline = "first line\u000Asecond line";
-```
-
----
+### 1.2 특수 문자
+- **공백 문자**: 공백(space)만 사용, 탭(tab) 사용 금지
+- **이스케이프 시퀀스**: `\b`, `\t`, `\n`, `\f`, `\r`, `\"`, `\'`, `\\` 사용
+- **비 ASCII 문자**: 유니코드 이스케이프(`\u000a`) 대신 실제 문자 사용
 
 ## 2. 소스 파일 구조
 
-소스 파일은 다음 순서로 구성됩니다:
-
+소스 파일은 다음 순서로 구성:
 1. 라이선스 또는 저작권 정보 (있는 경우)
 2. Package 문
 3. Import 문
-4. 정확히 하나의 최상위 클래스
+4. 클래스 선언
 
-각 섹션은 **한 줄의 빈 줄**로 구분합니다.
+**각 섹션 사이에 정확히 한 줄의 빈 줄 삽입**
 
 ### 2.1 Package 문
-
-- Package 문은 **줄바꿈하지 않습니다**.
-- 열 제한(100자)이 적용되지 않습니다.
-
-```java
-package com.example.board.controller;
-```
+- 줄바꿈하지 않음
+- 컬럼 제한(100자)에 영향받지 않음
 
 ### 2.2 Import 문
+- 와일드카드 import 사용 금지 (❌ `import java.util.*`)
+- 줄바꿈하지 않음
+- 정적 import와 비정적 import 구분
+- 알파벳 순으로 정렬
 
-#### 2.2.1 와일드카드 import 금지
-
-- 와일드카드 import(static 또는 일반)를 사용하지 않습니다.
-
-```java
-// Good
-import java.util.List;
-import java.util.ArrayList;
-
-// Bad
-import java.util.*;
-```
-
-#### 2.2.2 줄바꿈 금지
-
-- Import 문은 줄바꿈하지 않습니다.
-- 열 제한이 적용되지 않습니다.
-
-#### 2.2.3 순서 및 간격
-
-Import 문은 다음 순서로 그룹화하고, 각 그룹 사이에 빈 줄을 넣습니다:
-
-1. 모든 static import (한 블록)
-2. 모든 non-static import (한 블록)
-
-각 블록 내에서는 알파벳 순으로 정렬합니다.
+**순서**:
+1. 정적 import (알파벳순)
+2. 빈 줄
+3. 비정적 import (알파벳순)
 
 ```java
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
+import static com.board.util.Constants.MAX_FILE_SIZE;
+import static com.board.util.Constants.UPLOAD_DIR;
 
+import com.board.dto.Board;
+import com.board.exception.BoardException;
 import java.io.IOException;
 import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import com.example.board.dto.BoardDTO;
-import com.example.board.service.BoardService;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 ```
 
 ### 2.3 클래스 선언
 
-#### 2.3.1 정확히 하나의 최상위 클래스
+#### 클래스 구성 순서
+1. Static 변수 (public → protected → private)
+2. Instance 변수 (public → protected → private)
+3. 생성자
+4. 메서드
+    - Public 메서드
+    - Protected 메서드
+    - Private 메서드
+5. Inner 클래스 또는 Interface
 
-- 각 소스 파일에는 정확히 하나의 최상위 클래스가 있습니다.
-
-#### 2.3.2 클래스 멤버 순서
-
-클래스 멤버의 순서는 학습 가능성에 큰 영향을 미칩니다. 권장 순서:
-
-1. 상수 (static final 필드)
-2. 정적 필드 (static 필드)
-3. 인스턴스 필드
-4. 생성자
-5. 메서드
-    - public 메서드
-    - protected 메서드
-    - private 메서드
-6. 내부 클래스/인터페이스
-
-**오버로드된 메서드는 연속적으로 배치합니다.**
+**오버로드된 메서드는 연속해서 배치**
 
 ```java
 public class BoardService {
-    // 1. 상수
-    private static final int MAX_TITLE_LENGTH = 100;
+    // Static 변수
+    private static final int PAGE_SIZE = 10;
     
-    // 2. 정적 필드
-    private static int instanceCount = 0;
+    // Instance 변수
+    private final BoardDAO boardDAO;
+    private final FileService fileService;
     
-    // 3. 인스턴스 필드
-    private BoardDAO boardDAO;
-    private FileService fileService;
-    
-    // 4. 생성자
+    // 생성자
     public BoardService() {
-        instanceCount++;
+        this.boardDAO = new BoardDAO();
+        this.fileService = new FileService();
     }
     
-    public BoardService(BoardDAO boardDAO) {
-        this.boardDAO = boardDAO;
-        instanceCount++;
-    }
+    // Public 메서드
+    public List<Board> getBoardList(int page) { }
+    public Board getBoardById(Long boardId) { }
     
-    // 5. public 메서드
-    public List<BoardDTO> getBoardList(int page) {
-        // ...
-    }
-    
-    public BoardDTO getBoard(int boardId) {
-        // ...
-    }
-    
-    // 6. private 메서드
-    private void validateBoard(BoardDTO board) {
-        // ...
-    }
+    // Private 메서드
+    private void validateBoard(Board board) { }
 }
 ```
-
----
 
 ## 3. 포매팅
 
 ### 3.1 중괄호
 
-#### 3.1.1 중괄호 사용 (K&R 스타일)
-
-- 중괄호는 `if`, `else`, `for`, `do`, `while` 문에서 본문이 비어 있거나 단일 문인 경우에도 사용합니다.
-
+#### K&R 스타일 사용
 ```java
-// Good
+// ✅ 올바른 예
 if (condition) {
     doSomething();
 }
 
-// Bad
+// ❌ 잘못된 예
 if (condition)
+{
     doSomething();
+}
 ```
 
-#### 3.1.2 비어있지 않은 블록: K&R 스타일
+#### 빈 블록
+```java
+// ✅ 간결한 스타일 허용
+void doNothing() {}
 
-- 여는 중괄호 앞에 줄바꿈 없음
-- 여는 중괄호 뒤에 줄바꿈
-- 닫는 중괄호 앞에 줄바꿈
-- 닫는 중괄호 뒤에 줄바꿈 (메서드, 생성자, 클래스 종료 등)
+// ✅ K&R 스타일도 가능
+void doNothingElse() {
+}
+
+// ❌ 잘못된 예
+void invalid() {
+    // 주석만 있는 경우
+}
+```
+
+### 3.2 블록 들여쓰기
+- **2칸 공백** 사용 (탭 금지)
+- 새 블록이 시작될 때마다 2칸씩 증가
 
 ```java
 public void example() {
-    if (condition) {
-        try {
-            something();
-        } catch (Exception e) {
-            recover();
-        }
-    } else {
-        somethingElse();
-    }
-}
-```
-
-#### 3.1.3 빈 블록
-
-- 빈 블록은 `{}`로 간결하게 작성할 수 있습니다.
-
-```java
-// Good
-public void doNothing() {}
-
-// Also acceptable
-public void doNothing() {
-}
-```
-
-### 3.2 블록 들여쓰기: +2 스페이스
-
-- 새 블록이나 블록과 유사한 구조가 열릴 때마다 들여쓰기는 **2 스페이스** 증가합니다.
-- 블록이 종료되면 들여쓰기는 이전 수준으로 돌아갑니다.
-
-```java
-public class Example {
-  private int value;
-  
-  public void method() {
-    if (condition) {
-      doSomething();
+  if (condition) {
+    for (int i = 0; i < 10; i++) {
+      doSomething(i);
     }
   }
 }
 ```
 
-### 3.3 한 줄에 한 문장
-
-- 각 문장 뒤에는 줄바꿈이 옵니다.
-
+### 3.3 줄당 하나의 문장
 ```java
-// Good
+// ✅ 올바른 예
 int a = 1;
 int b = 2;
 
-// Bad
-int a = 1; int b = 2;
+// ❌ 잘못된 예
+int a = 1, b = 2;
 ```
 
-### 3.4 열 제한: 100
-
-- 프로젝트는 **100자** 열 제한을 사용합니다.
+### 3.4 컬럼 제한
+- **100자** 제한
 - 예외:
-    - 열 제한을 준수할 수 없는 줄 (예: Javadoc의 긴 URL)
-    - package 및 import 문
-    - 주석의 명령줄
+    - Package 및 import 문
+    - 주석의 URL
+    - 긴 문자열 리터럴
 
 ### 3.5 줄바꿈
+컬럼 제한을 초과하는 경우 줄바꿈 수행
 
-#### 3.5.1 언제 줄바꿈하는가
+#### 줄바꿈 위치
+1. **비 할당 연산자** 앞에서 끊김
+   ```java
+   // ✅ 올바른 예
+   String longString = "This is a very long string that needs "
+       + "to be broken into multiple lines";
+   ```
 
-- 주요 원칙: **더 높은 구문 수준에서 줄바꿈**하는 것을 선호합니다.
+2. **할당 연산자** 뒤에서 끊김
+   ```java
+   // ✅ 올바른 예
+   String veryLongVariableName =
+       someMethodThatReturnsAString();
+   ```
+
+3. **메서드 또는 생성자 이름** 뒤의 여는 괄호 `(`에 붙임
+   ```java
+   // ✅ 올바른 예
+   public void someLongMethodName(
+       String parameter1, String parameter2) {
+   ```
+
+4. **쉼표** 뒤에서 끊김
+   ```java
+   // ✅ 올바른 예
+   doSomething(parameter1,
+       parameter2,
+       parameter3);
+   ```
+
+#### 들여쓰기
+- 계속되는 줄은 **최소 +4칸** 들여쓰기
 
 ```java
-// Good - 메서드 체인
-someObject.someMethod()
+// ✅ 올바른 예
+String result = someObject.someMethod()
     .anotherMethod()
     .yetAnotherMethod();
 
-// Good - 연산자 앞에서 줄바꿈
-int result = veryLongVariableName
-    + anotherLongVariableName
-    + yetAnotherVariable;
-```
-
-#### 3.5.2 들여쓰기
-
-- 줄바꿈 시 원래 줄에서 최소 **+4 스페이스** 들여씁니다.
-
-```java
-public void longMethodName(String firstParameter,
-    String secondParameter, String thirdParameter) {
-    // 메서드 본문
+if (veryLongCondition1 && veryLongCondition2
+    && veryLongCondition3) {
+  doSomething();
 }
 ```
 
 ### 3.6 공백
 
-#### 3.6.1 수직 공백
-
-다음 경우에 빈 줄을 사용합니다:
-
-- 클래스의 멤버(필드, 생성자, 메서드, 내부 클래스 등) 사이
-- 메서드 내에서 논리적 그룹을 구분하기 위해
-- 첫 번째 멤버 앞이나 마지막 멤버 뒤 (선택 사항)
+#### 수직 공백
+다음 경우에 빈 줄 삽입:
+- 클래스 멤버 사이 (필드, 생성자, 메서드 등)
+- 메서드 내에서 논리적 그룹을 구분할 때
+- Import 그룹 사이
 
 ```java
 public class Example {
@@ -326,679 +226,469 @@ public class Example {
 }
 ```
 
-#### 3.6.2 수평 공백
+#### 수평 공백
+1. **예약어와 괄호 사이**
+   ```java
+   if (condition) { }
+   for (int i = 0; i < 10; i++) { }
+   while (condition) { }
+   ```
 
-다음 경우에 공백을 사용합니다:
+2. **이항/삼항 연산자 양쪽**
+   ```java
+   int sum = a + b;
+   boolean result = (a > b) ? true : false;
+   ```
 
-```java
-// if, for, while, switch 등의 키워드와 여는 괄호 사이
-if (condition) {
+3. **쉼표, 세미콜론, 콜론 뒤**
+   ```java
+   doSomething(a, b, c);
+   for (int i = 0; i < 10; i++) { }
+   ```
 
-// else, catch 등의 키워드와 앞의 닫는 중괄호 사이
-} else {
+4. **주석 시작 문자 뒤**
+   ```java
+   // 주석
+   /* 주석 */
+   ```
 
-// 여는 중괄호 앞
-void method() {
+5. **중괄호 양쪽** (특정 상황)
+   ```java
+   new int[] {1, 2, 3}
+   ```
 
-// 이항/삼항 연산자 양쪽
-a + b
-condition ? a : b
+## 4. 네이밍
 
-// 타입 경계 앞뒤 : <T extends Foo & Bar>
+### 4.1 공통 규칙
+- 영문 알파벳, 숫자만 사용
+- 언더스코어(_)는 상수에만 사용
+- 의미 있고 발음 가능한 이름 사용
 
-// 주석 시작 문자 뒤
-// This is a comment
-
-// 콤마, 콜론, 세미콜론 뒤
-for (int i = 0; i < 10; i++) {
-```
-
-### 3.7 괄호 그룹화
-
-- 선택적 괄호는 작성자와 검토자가 괄호 없이도 코드를 잘못 해석할 가능성이 없고, 코드를 더 읽기 쉽게 만들지 않는다고 동의할 때만 생략합니다.
-
-```java
-// Good - 명확함
-if ((a && b) || c) {
-    
-// Also acceptable if clear
-if (a && b || c) {
-```
-
----
-
-## 4. 명명 규칙
-
-### 4.1 모든 식별자에 공통적인 규칙
-
-- 식별자는 ASCII 문자와 숫자만 사용합니다.
-- 밑줄은 상수 이름과 일부 예외적인 경우에만 사용합니다.
-
-### 4.2 식별자 유형별 규칙
-
-#### 4.2.1 Package 이름
-
-- 모두 소문자
-- 연속된 단어는 단순히 연결 (밑줄 없음)
+### 4.2 패키지명
+- **소문자** + **숫자** (언더스코어 사용 안 함)
+- 단어 연결 시 그냥 연결 (구분자 없음)
 
 ```java
-com.example.board
-com.example.board.controller
+com.board.servlet
+com.board.service
+com.board.dao
+com.board.dto
+com.board.exception
+com.board.util
 ```
 
-#### 4.2.2 Class 이름
-
+### 4.3 클래스명
 - **UpperCamelCase** (PascalCase)
 - 명사 또는 명사구
+- 테스트 클래스: `{테스트 대상 클래스명}Test`
 
 ```java
-public class BoardController { }
-public class BoardService { }
-public class BoardDTO { }
+// ✅ 올바른 예
+BoardListServlet
+BoardService
+BoardDAO
+BoardException
+FileUploadUtil
+
+// 테스트 클래스
+BoardServiceTest
 ```
 
-#### 4.2.3 Method 이름
-
+### 4.4 메서드명
 - **lowerCamelCase**
 - 동사 또는 동사구
 
 ```java
-public void getBoardList() { }
-public void createBoard() { }
-public boolean isValid() { }
+// ✅ 올바른 예
+getBoardList()
+createBoard()
+deleteBoard()
+validateInput()
+isValidPassword()
+hasPermission()
 ```
 
-#### 4.2.4 Constant 이름
+**규칙**:
+- **get**: 값 반환
+- **set**: 값 설정
+- **is/has**: boolean 반환
+- **create/add**: 생성
+- **update/modify**: 수정
+- **delete/remove**: 삭제
+- **validate**: 유효성 검증
 
-- **UPPER_SNAKE_CASE**
-- 모두 대문자, 단어는 밑줄로 구분
-- `static final` 필드로서 내용이 불변인 경우
-
-```java
-private static final int MAX_BOARD_COUNT = 100;
-private static final String DEFAULT_CATEGORY = "Java";
-```
-
-#### 4.2.5 Non-constant 필드 이름
-
+### 4.5 변수명
 - **lowerCamelCase**
 - 명사 또는 명사구
 
 ```java
-private BoardDAO boardDAO;
-private String userName;
-private int pageNumber;
+// ✅ 올바른 예
+String userName;
+int pageNumber;
+List<Board> boardList;
+LocalDate searchFromDate; // 검색 시작일
+LocalDate searchToDate;   // 검색 종료일
 ```
 
-#### 4.2.6 Parameter 이름
+#### 한 글자 변수명
+루프 인덱스 또는 예외 변수에만 사용:
+```java
+for (int i = 0; i < 10; i++) { }
+try { } catch (Exception e) { }
+```
 
-- **lowerCamelCase**
-- public 메서드에서 한 글자 매개변수 이름을 피합니다.
+### 4.6 상수명
+- **UPPER_SNAKE_CASE**
+- `static final` 필드
 
 ```java
-// Good
-public void setTitle(String title) { }
-
-// Bad (한 글자 변수명)
-public void setTitle(String t) { }
-
-// Acceptable (for loop의 경우)
-for (int i = 0; i < list.size(); i++) {
+// ✅ 올바른 예
+private static final int MAX_FILE_SIZE = 2097152; // 2MB
+private static final String UPLOAD_DIR = "/uploads";
+private static final int PAGE_SIZE = 10;
+private static final int DEFAULT_SEARCH_YEARS = 1; // 검색 기본 기간 (1년)
 ```
 
-#### 4.2.7 Local 변수 이름
+### 4.7 프로젝트별 네이밍 규칙
 
-- **lowerCamelCase**
-- final이고 불변인 경우에도 상수로 간주되지 않으며, 상수 스타일로 작성되지 않습니다.
+#### DTO 클래스
+```java
+Board.java          // 게시글
+BoardFile.java      // 파일 (java.io.File과 구분)
+Comment.java        // 댓글
+Category.java       // 카테고리
+SearchParams.java   // 검색 조건 (추가됨!)
+```
+
+#### SearchParams DTO 예시
+```java
+public class SearchParams {
+    private Integer category;     // 카테고리 ID (nullable)
+    private LocalDate from;       // 시작일 (기본: 1년 전)
+    private LocalDate to;         // 종료일 (기본: 오늘)
+    private String keyword;       // 검색어 (nullable)
+    private Integer page;         // 페이지 번호 (기본: 1)
+    
+    // Getter/Setter...
+}
+```
+
+#### DAO 클래스
+```java
+BoardDAO.java
+FileDAO.java
+CommentDAO.java
+CategoryDAO.java
+```
+
+#### Service 클래스
+```java
+BoardService.java
+FileService.java
+CommentService.java
+```
+
+#### Servlet 클래스
+```java
+BoardListServlet.java       // GET /boards
+BoardViewServlet.java       // GET /board/view
+BoardPostServlet.java       // GET/POST /board/post
+BoardEditServlet.java       // GET/POST /board/edit
+BoardDeleteServlet.java     // POST /board/delete
+CommentServlet.java         // POST /comment
+FileDownloadServlet.java    // GET /download
+AuthServlet.java            // POST /auth/confirm
+```
+
+#### Exception 클래스
+```java
+BoardException.java         // 기본 예외
+ValidationException.java    // 검증 예외
+FileUploadException.java    // 파일 업로드 예외
+AuthenticationException.java // 인증 예외
+```
+
+#### Util 클래스
+```java
+FileUtil.java              // 파일 처리
+ValidationUtil.java        // 유효성 검증
+DateUtil.java              // 날짜 처리 (추가됨!)
+```
+
+## 5. 주석
+
+### 5.1 Javadoc
+
+#### 필수 대상
+- Public 클래스
+- Public/Protected 메서드
+
+#### 형식
+```java
+/**
+ * 게시글 목록을 조회합니다.
+ *
+ * @param searchParams 검색 조건 (category, from, to, keyword)
+ * @return 게시글 목록
+ * @throws BoardException 조회 중 오류 발생 시
+ */
+public List<Board> getBoardList(SearchParams searchParams) throws BoardException {
+  // 구현
+}
+```
+
+#### 요약 설명
+- 첫 문장은 완전한 문장으로 작성
+- 마침표로 끝남
+- 메서드의 경우 3인칭 현재형 동사로 시작
+
+### 5.2 구현 주석
+
+#### 블록 주석
+```java
+/*
+ * 여러 줄에 걸친
+ * 주석입니다.
+ */
+```
+
+#### 한 줄 주석
+```java
+// 짧은 주석
+```
+
+#### 사용 시점
+- 복잡한 로직 설명
+- TODO 표시
+- 중요한 결정 사항 기록
 
 ```java
-String userName = "John";
-int totalCount = 100;
+// TODO: 파일 업로드 검증 로직 추가 필요
+// FIXME: 트랜잭션 롤백 처리 개선
+
+// 검색 날짜 기본값 설정 (from: 1년 전, to: 오늘)
+if (searchParams.getFrom() == null) {
+    searchParams.setFrom(LocalDate.now().minusYears(1));
+}
 ```
 
-#### 4.2.8 Type 변수 이름
+## 6. 프로그래밍 관행
 
-두 가지 스타일 중 하나:
-
-1. 단일 대문자, 선택적으로 단일 숫자: `E`, `T`, `K`, `V`
-2. 클래스에 사용되는 형식 + 대문자 `T`: `RequestT`, `FooBarT`
-
-```java
-public class Box<T> { }
-public interface List<E> { }
-public class HashMap<K, V> { }
-```
-
-### 4.3 Camel Case 정의
-
-약어나 특이한 구조가 있는 경우:
-
-1. 구문을 일반 ASCII로 변환하고 아포스트로피 제거
-2. 공백과 구두점으로 단어 분리
-3. 모든 것을 소문자로 변환
-4. 다음의 첫 글자만 대문자로:
-    - UpperCamelCase: 각 단어
-    - lowerCamelCase: 첫 단어를 제외한 각 단어
-
-```java
-// "XML HTTP request" → XmlHttpRequest (UpperCamelCase)
-// "supports IPv6 on iOS" → supportsIpv6OnIos (lowerCamelCase)
-```
-
----
-
-## 5. 프로그래밍 관례
-
-### 5.1 @Override 항상 사용
-
-- 메서드가 상위 클래스 메서드를 재정의하거나, 인터페이스 메서드를 구현하거나, 상위 인터페이스 메서드를 재지정하는 경우 `@Override` 어노테이션을 사용합니다.
-
+### 6.1 @Override 애노테이션
+항상 사용:
 ```java
 @Override
-public String toString() {
-    return "BoardDTO";
+public void doGet(HttpServletRequest request, HttpServletResponse response) {
+  // 구현
 }
 ```
 
-### 5.2 예외 처리
-
-#### 5.2.1 예외를 무시하지 않음
-
-- catch 블록에서 예외를 무시하는 것은 매우 드물게 정당화됩니다.
-- 무시하는 것이 정당한 경우, 주석으로 설명합니다.
+### 6.2 예외 처리
+- 빈 catch 블록 금지
+- 구체적인 예외 타입 사용
+- 예외를 무시하는 경우 주석으로 이유 설명
 
 ```java
-// Good
+// ✅ 올바른 예
 try {
-    int result = someMethod();
-} catch (NumberFormatException expected) {
-    // 예외 발생이 예상되는 경우, 무시하는 것이 정당함
+  doSomething();
+} catch (IOException e) {
+  logger.error("파일 읽기 실패", e);
+  throw new BoardException("파일 처리 중 오류가 발생했습니다.", e);
 }
 
-// Bad
+// ❌ 잘못된 예
 try {
-    int result = someMethod();
+  doSomething();
 } catch (Exception e) {
-    // 아무것도 하지 않음
+  // 무시
 }
 ```
 
-### 5.3 Static 멤버: 클래스로 접근
-
-- static 멤버를 참조할 때는 해당 클래스의 이름으로 접근합니다.
-
+### 6.3 Static 멤버
+클래스명으로 접근:
 ```java
-// Good
-Foo.aStaticMethod();
+// ✅ 올바른 예
+String result = MyClass.staticMethod();
 
-// Bad
-someInstance.aStaticMethod();
+// ❌ 잘못된 예
+MyClass obj = new MyClass();
+String result = obj.staticMethod();
 ```
 
-### 5.4 Finalizers 사용 금지
+### 6.4 파이널라이저 사용 금지
+`finalize()` 메서드 오버라이드 금지
 
-- `Object.finalize`를 재정의하지 않습니다.
+## 7. 프로젝트별 추가 규칙
 
-### 5.5 Switch 문
+### 7.1 SQL 쿼리
+- MyBatis Mapper XML에 작성
+- 동적 SQL은 `<if>`, `<choose>` 등 MyBatis 태그 사용
+- 파라미터 바인딩은 `#{}` 사용 (SQL Injection 방지)
 
-#### 5.5.1 들여쓰기
+```xml
+<!-- ✅ 올바른 예 -->
+<select id="selectBoardById" resultType="Board">
+  SELECT * FROM board WHERE board_id = #{boardId}
+</select>
 
-- switch 블록의 내용은 +2 들여쓰기
-- 각 switch 레이블 뒤에는 +2 들여쓰기
+<!-- ❌ 잘못된 예 (SQL Injection 위험) -->
+<select id="selectBoardById" resultType="Board">
+  SELECT * FROM board WHERE board_id = ${boardId}
+</select>
+```
+
+### 7.2 JSP 스크립틀릿
+- 필요한 경우에만 사용
+- 복잡한 로직은 Servlet/Service로 분리
+- 가능하면 EL 표현식 사용
+
+```jsp
+<!-- ✅ 가능한 예 (단순 루프) -->
+<%
+  List<Board> boards = (List<Board>) request.getAttribute("boards");
+  for (Board board : boards) {
+%>
+  <tr>
+    <td><%= board.getTitle() %></td>
+  </tr>
+<%
+  }
+%>
+```
+
+### 7.3 리소스 관리
+- try-with-resources 사용
+- Connection, Statement, ResultSet 등은 반드시 닫기
 
 ```java
-switch (value) {
-  case 1:
-    doSomething();
-    break;
-  case 2:
-    doSomethingElse();
-    break;
-  default:
-    doDefault();
+// ✅ 올바른 예
+try (Connection conn = dataSource.getConnection();
+     PreparedStatement pstmt = conn.prepareStatement(sql)) {
+  // 사용
+} catch (SQLException e) {
+  // 예외 처리
 }
 ```
 
-#### 5.5.2 Fall-through
-
-- 각 switch 레이블 그룹은 `break`, `return`, 또는 예외를 던지는 것으로 종료하거나, fall-through를 나타내는 주석을 포함해야 합니다.
-
+### 7.4 파일 경로 처리
 ```java
-switch (value) {
-  case 1:
-    doSomething();
-    // fall through
-  case 2:
-    doSomethingElse();
-    break;
-  default:
-    doDefault();
-}
-```
-
-#### 5.5.3 Default case
-
-- 각 switch 문은 `default` 문 그룹을 포함해야 합니다 (아무 코드도 없더라도).
-
-```java
-switch (value) {
-  case 1:
-    doSomething();
-    break;
-  default:
-    // 처리할 것이 없음
-    break;
-}
-```
-
----
-
-## 6. Javadoc
-
-### 6.1 형식
-
-#### 6.1.1 일반 형식
-
-```java
-/**
- * 여러 줄의 Javadoc 텍스트는 여기에 작성되며,
- * 일반적으로 줄바꿈됩니다...
- */
-public void method(String parameter) {
-```
-
-또는 단일 줄:
-
-```java
-/** 특히 짧은 Javadoc. */
-public void method() {
-```
-
-#### 6.1.2 단락
-
-- 빈 줄(정렬된 선행 별표(`*`)만 포함하는 줄)은 단락 사이에 나타납니다.
-
-```java
-/**
- * 첫 번째 단락.
- *
- * 두 번째 단락.
- */
-```
-
-#### 6.1.3 블록 태그
-
-- 블록 태그는 `@param`, `@return`, `@throws`, `@deprecated` 순서로 나타납니다.
-- 4개 이상의 블록 태그가 있는 경우, 설명을 들여쓸 수 있습니다.
-
-```java
-/**
- * 게시글을 조회합니다.
- *
- * @param boardId 게시글 ID
- * @return 게시글 정보
- * @throws BoardNotFoundException 게시글이 존재하지 않는 경우
- */
-public BoardDTO getBoard(int boardId) throws BoardNotFoundException {
-    // ...
-}
-```
-
-### 6.2 요약 문구
-
-- 각 Javadoc 블록은 간단한 요약 문구로 시작합니다.
-- 이 문구는 매우 중요합니다: 클래스 및 메서드 인덱스와 같은 특정 컨텍스트에 나타나는 텍스트의 유일한 부분입니다.
-
-```java
-/**
- * 게시글 목록을 페이지 단위로 조회합니다.
- */
-public List<BoardDTO> getBoardList(int page) {
-```
-
-### 6.3 어디에 Javadoc을 사용하는가
-
-최소한 모든 `public` 클래스와 해당 클래스의 모든 `public` 또는 `protected` 멤버에는 Javadoc이 있어야 합니다.
-
-#### 6.3.1 예외: 자명한 메서드
-
-- `getFoo`와 같은 "간단하고 명백한" 메서드의 경우 Javadoc은 선택 사항입니다.
-
-```java
-// Javadoc 선택 사항
-public String getTitle() {
-    return title;
+// ✅ 올바른 예
+String uploadPath = getServletContext().getRealPath("/uploads");
+File uploadDir = new File(uploadPath);
+if (!uploadDir.exists()) {
+    uploadDir.mkdirs();
 }
 
-// Javadoc 필요
-/**
- * 게시글의 조회수를 1 증가시킵니다.
- */
-public void incrementViewCount() {
-    this.views++;
-}
+// 파일 저장
+String savedFileName = UUID.randomUUID().toString() + "." + extension;
+File destFile = new File(uploadDir, savedFileName);
 ```
 
-#### 6.3.2 예외: 재정의
+### 7.5 날짜 처리
+```java
+// ✅ LocalDate 사용 (Java 8+)
+LocalDate today = LocalDate.now();
+LocalDate oneYearAgo = today.minusYears(1);
 
-- `@Override` 메서드는 항상 Javadoc이 필요한 것은 아닙니다.
-
----
-
-## 7. 프로젝트 특화 규칙
-
-### 7.1 계층 구조
-
-```
-controller  - Servlet 클래스 (요청/응답 처리)
-service     - 비즈니스 로직
-dao         - 데이터베이스 접근
-dto         - 데이터 전송 객체
-util        - 유틸리티 클래스
-exception   - 사용자 정의 예외
+// String → LocalDate 변환
+String fromStr = request.getParameter("from");
+LocalDate from = (fromStr != null && !fromStr.isEmpty()) 
+    ? LocalDate.parse(fromStr) 
+    : LocalDate.now().minusYears(1);
 ```
 
-### 7.2 클래스 명명 규칙
-
-| 계층 | 접미사 | 예시 |
-|------|--------|------|
-| Controller | `Servlet` | `BoardListServlet`, `BoardViewServlet` |
-| Service | `Service` | `BoardService`, `FileService` |
-| DAO | `DAO` | `BoardDAO`, `CommentDAO` |
-| DTO | `DTO` 또는 없음 | `BoardDTO`, `CommentDTO` |
-| Exception | `Exception` | `BoardNotFoundException` |
-| Util | `Util` 또는 `Helper` | `ValidationUtil`, `DateUtil` |
-
-### 7.3 메서드 명명 규칙
-
-#### 7.3.1 CRUD 작업
-
-| 작업 | 접두사 | 예시 |
-|------|--------|------|
-| 조회 (단건) | `get` | `getBoard(int id)` |
-| 조회 (목록) | `get` + `List` | `getBoardList(SearchCondition condition)` |
-| 생성 | `create` 또는 `insert` | `createBoard(BoardDTO board)` |
-| 수정 | `update` | `updateBoard(BoardDTO board)` |
-| 삭제 | `delete` | `deleteBoard(int id)` |
-| 개수 조회 | `count` | `countBoards(SearchCondition condition)` |
-
-#### 7.3.2 검증 메서드
+### 7.6 로깅
+- System.out.println() 대신 로거 사용
+- 민감 정보(비밀번호 등) 로깅 금지
 
 ```java
-// boolean 반환
-public boolean isValidPassword(String password) {
-    return password != null && password.length() >= 8;
-}
+// ✅ 올바른 예
+private static final Logger logger = LoggerFactory.getLogger(BoardService.class);
 
-// 예외 발생
-public void validateBoard(BoardDTO board) throws ValidationException {
-    if (board == null) {
-        throw new ValidationException("Board cannot be null");
-    }
-}
+logger.info("게시글 조회: boardId={}", boardId);
+logger.error("게시글 삭제 실패: boardId={}", boardId, e);
+
+// ❌ 잘못된 예
+System.out.println("게시글 조회: " + boardId);
+logger.info("사용자 비밀번호: " + password); // 민감 정보 로깅 금지
 ```
 
-### 7.4 상수 정의
+## 8. 검색 기능 구현 가이드
 
+### 8.1 SearchParams 처리
 ```java
-public class BoardConstants {
-    // 페이징
-    public static final int DEFAULT_PAGE_SIZE = 10;
-    public static final int DEFAULT_PAGE_NUMBER = 1;
+public class SearchParams {
+    private Integer category;
+    private LocalDate from;
+    private LocalDate to;
+    private String keyword;
+    private int page = 1;
     
-    // 파일
-    public static final long MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
-    public static final int MAX_FILE_COUNT = 3;
-    public static final String[] ALLOWED_EXTENSIONS = {"jpg", "pdf", "png"};
-    
-    // 게시글
-    public static final int MIN_TITLE_LENGTH = 4;
-    public static final int MAX_TITLE_LENGTH = 1000;
-    public static final int MIN_CONTENT_LENGTH = 4;
-    public static final int MAX_CONTENT_LENGTH = 4000;
-    
-    private BoardConstants() {
-        // 인스턴스화 방지
-        throw new AssertionError();
-    }
-}
-```
-
-### 7.5 DTO 작성 규칙
-
-```java
-public class BoardDTO {
-    private Long boardId;
-    private Long categoryId;
-    private String title;
-    private String content;
-    private String userName;
-    private Long views;
-    private LocalDateTime createdAt;
-    private LocalDateTime editedAt;
-    
-    // 연관 데이터
-    private String categoryName;
-    private boolean hasAttachment;
-    private List<FileDTO> files;
-    private List<CommentDTO> comments;
-    
-    // 기본 생성자
-    public BoardDTO() {
-    }
-    
-    // Getter/Setter
-    public Long getBoardId() {
-        return boardId;
-    }
-    
-    public void setBoardId(Long boardId) {
-        this.boardId = boardId;
-    }
-    
-    // ... 나머지 getter/setter
-    
-    @Override
-    public String toString() {
-        return "BoardDTO{" +
-            "boardId=" + boardId +
-            ", title='" + title + '\'' +
-            ", userName='" + userName + '\'' +
-            '}';
-    }
-}
-```
-
-### 7.6 예외 처리
-
-```java
-// Service 계층
-public BoardDTO getBoard(int boardId) throws BoardNotFoundException {
-    BoardDTO board = boardDAO.selectById(boardId);
-    if (board == null) {
-        throw new BoardNotFoundException("게시글을 찾을 수 없습니다. ID: " + boardId);
-    }
-    return board;
-}
-
-// Servlet 계층
-try {
-    BoardDTO board = boardService.getBoard(boardId);
-    request.setAttribute("board", board);
-    forward(request, response, "/WEB-INF/views/board/view.jsp");
-} catch (BoardNotFoundException e) {
-    logger.error("게시글 조회 실패", e);
-    response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-} catch (Exception e) {
-    logger.error("예상치 못한 오류", e);
-    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.");
-}
-```
-
-### 7.7 로깅
-
-```java
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public class BoardService {
-    private static final Logger logger = LoggerFactory.getLogger(BoardService.class);
-    
-    public BoardDTO getBoard(int boardId) {
-        logger.debug("게시글 조회 시작: boardId={}", boardId);
-        
-        try {
-            BoardDTO board = boardDAO.selectById(boardId);
-            logger.info("게시글 조회 성공: boardId={}", boardId);
-            return board;
-        } catch (Exception e) {
-            logger.error("게시글 조회 실패: boardId={}", boardId, e);
-            throw e;
+    /**
+     * 기본값 설정
+     */
+    public void applyDefaults() {
+        if (from == null) {
+            from = LocalDate.now().minusYears(1);
+        }
+        if (to == null) {
+            to = LocalDate.now();
         }
     }
 }
 ```
 
-### 7.8 SQL Mapper (MyBatis) 규칙
-
-```xml
-<!-- BoardMapper.xml -->
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-
-<mapper namespace="com.example.board.dao.BoardDAO">
+### 8.2 Servlet에서 처리
+```java
+@Override
+protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+    SearchParams params = new SearchParams();
     
-    <!-- Result Map -->
-    <resultMap id="boardResultMap" type="com.example.board.dto.BoardDTO">
-        <id property="boardId" column="board_id"/>
-        <result property="categoryId" column="category_id"/>
-        <result property="title" column="title"/>
-        <result property="content" column="content"/>
-        <result property="userName" column="user_name"/>
-        <result property="views" column="views"/>
-        <result property="createdAt" column="created_at"/>
-        <result property="editedAt" column="edited_at"/>
-    </resultMap>
+    // 파라미터 파싱
+    String categoryStr = request.getParameter("category");
+    if (categoryStr != null && !categoryStr.isEmpty()) {
+        params.setCategory(Integer.parseInt(categoryStr));
+    }
     
-    <!-- Select 쿼리 -->
-    <select id="selectById" parameterType="int" resultMap="boardResultMap">
-        SELECT *
-        FROM board
-        WHERE board_id = #{boardId}
-    </select>
+    String fromStr = request.getParameter("from");
+    if (fromStr != null && !fromStr.isEmpty()) {
+        params.setFrom(LocalDate.parse(fromStr));
+    }
     
-    <!-- Insert 쿼리 -->
-    <insert id="insert" parameterType="com.example.board.dto.BoardDTO"
-            useGeneratedKeys="true" keyProperty="boardId">
-        INSERT INTO board (
-            category_id, title, content, user_name, password, views
-        ) VALUES (
-            #{categoryId}, #{title}, #{content}, #{userName}, 
-            SHA2(#{password}, 256), 0
-        )
-    </insert>
+    String toStr = request.getParameter("to");
+    if (toStr != null && !toStr.isEmpty()) {
+        params.setTo(LocalDate.parse(toStr));
+    }
     
-    <!-- Update 쿼리 -->
-    <update id="update" parameterType="com.example.board.dto.BoardDTO">
-        UPDATE board
-        SET title = #{title},
-            content = #{content},
-            edited_at = CURRENT_TIMESTAMP
-        WHERE board_id = #{boardId}
-    </update>
+    params.setKeyword(request.getParameter("keyword"));
     
-    <!-- Delete 쿼리 -->
-    <delete id="delete" parameterType="int">
-        DELETE FROM board
-        WHERE board_id = #{boardId}
-    </delete>
+    // 기본값 적용
+    params.applyDefaults();
     
-</mapper>
+    // 서비스 호출
+    List<Board> boards = boardService.getBoardList(params);
+}
 ```
 
-### 7.9 JSP 작성 규칙
+## 9. 체크리스트
 
-```jsp
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+코드 작성 후 다음 사항을 확인:
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>게시판</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/style.css">
-</head>
-<body>
-    <div class="container">
-        <h1>게시글 목록</h1>
-        
-        <table class="board-table">
-            <thead>
-                <tr>
-                    <th>번호</th>
-                    <th>카테고리</th>
-                    <th>제목</th>
-                    <th>작성자</th>
-                    <th>조회수</th>
-                    <th>등록일</th>
-                </tr>
-            </thead>
-            <tbody>
-                <c:forEach var="board" items="${boardList}">
-                    <tr>
-                        <td>${board.boardId}</td>
-                        <td>${board.categoryName}</td>
-                        <td>
-                            <a href="${pageContext.request.contextPath}/board/view?boardId=${board.boardId}">
-                                ${board.title}
-                            </a>
-                        </td>
-                        <td>${board.userName}</td>
-                        <td>${board.views}</td>
-                        <td>
-                            <fmt:formatDate value="${board.createdAt}" pattern="yyyy-MM-dd HH:mm"/>
-                        </td>
-                    </tr>
-                </c:forEach>
-            </tbody>
-        </table>
-    </div>
-    
-    <script src="${pageContext.request.contextPath}/resources/js/board.js"></script>
-</body>
-</html>
-```
-
----
+- [ ] 들여쓰기는 2칸 공백인가?
+- [ ] 한 줄은 100자를 넘지 않는가?
+- [ ] 모든 Public 클래스와 메서드에 Javadoc이 있는가?
+- [ ] 네이밍 규칙을 준수했는가?
+- [ ] Import 문은 정렬되어 있고 와일드카드가 없는가?
+- [ ] 예외는 적절히 처리되고 있는가?
+- [ ] 리소스는 확실히 닫히는가?
+- [ ] SQL Injection 취약점은 없는가?
+- [ ] 민감 정보가 로그에 남지 않는가?
+- [ ] 파일 저장 경로는 `/uploads`인가?
+- [ ] 검색 날짜 기본값이 적용되는가?
+- [ ] 작성자 길이는 2~10자인가?
 
 ## 참고 자료
 
 - [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html)
 - [Oracle Java Code Conventions](https://www.oracle.com/java/technologies/javase/codeconventions-contents.html)
-- [Clean Code by Robert C. Martin](https://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882)
-
----
-
-## IDE 설정
-
-### IntelliJ IDEA
-
-1. `Settings` → `Editor` → `Code Style` → `Java`
-2. `Scheme` 옆의 톱니바퀴 아이콘 클릭
-3. `Import Scheme` → `IntelliJ IDEA code style XML`
-4. [intellij-java-google-style.xml](https://github.com/google/styleguide/blob/gh-pages/intellij-java-google-style.xml) 파일 선택
-
-### Eclipse
-
-1. `Window` → `Preferences` → `Java` → `Code Style` → `Formatter`
-2. `Import` 클릭
-3. [eclipse-java-google-style.xml](https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml) 파일 선택
-
-### 자동 포매팅
-
-코드 작성 후 다음 단축키로 자동 포매팅:
-- IntelliJ: `Ctrl + Alt + L` (Windows/Linux), `Cmd + Option + L` (Mac)
-- Eclipse: `Ctrl + Shift + F` (Windows/Linux), `Cmd + Shift + F` (Mac)

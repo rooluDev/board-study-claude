@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  웹 애플리케이션 배포 설정 파일 (Deployment Descriptor)
+
+  Servlet 버전: 6.0 (Jakarta EE 10)
+  설명: 게시판 시스템의 Servlet 매핑, 필터, 리스너 등을 정의
+-->
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+                             https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0">
+
+  <!-- 애플리케이션 기본 정보 -->
+  <display-name>Board System</display-name>
+  <description>Servlet/JSP 기반 게시판 시스템</description>
+
+  <!-- 기본 시작 페이지 -->
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+
+  <!-- 세션 타임아웃 설정 (30분) -->
+  <session-config>
+    <session-timeout>30</session-timeout>
+  </session-config>
+
+  <!-- 에러 페이지 설정 -->
+  <error-page>
+    <error-code>404</error-code>
+    <location>/WEB-INF/views/error/404.jsp</location>
+  </error-page>
+
+  <error-page>
+    <error-code>500</error-code>
+    <location>/WEB-INF/views/error/500.jsp</location>
+  </error-page>
+
+  <error-page>
+    <exception-type>java.lang.Exception</exception-type>
+    <location>/WEB-INF/views/error/error.jsp</location>
+  </error-page>
+
+  <!-- 파일 업로드 최대 크기 설정 -->
+  <context-param>
+    <param-name>max-file-size</param-name>
+    <param-value>2097152</param-value> <!-- 2MB -->
+  </context-param>
+
+  <context-param>
+    <param-name>max-request-size</param-name>
+    <param-value>10485760</param-value> <!-- 10MB (파일 3개 * 2MB + 여유) -->
+  </context-param>
+
+  <!--
+    Servlet 매핑은 아래에 추가됩니다.
+    각 Servlet 클래스를 구현한 후 매핑을 추가하세요.
+
+    예시:
+    <servlet>
+      <servlet-name>BoardListServlet</servlet-name>
+      <servlet-class>com.board.servlet.BoardListServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+      <servlet-name>BoardListServlet</servlet-name>
+      <url-pattern>/boards</url-pattern>
+    </servlet-mapping>
+  -->
+
+</web-app>

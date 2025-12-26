@@ -1,1 +1,7 @@
+/*
+ * Gradle Settings for Board System Project
+ *
+ * 프로젝트명: board-model2
+ * 설명: Servlet/JSP 기반 게시판 시스템
+ */
 rootProject.name = 'board-model2'

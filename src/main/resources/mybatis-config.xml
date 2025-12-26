@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<!--
+  MyBatis 설정 파일
+
+  버전: MyBatis 3.5.13
+  설명: 데이터베이스 연결 및 Mapper 설정
+-->
+<configuration>
+  <!-- 설정 -->
+  <settings>
+    <!-- 언더스코어를 카멜케이스로 자동 매핑 (user_name -> userName) -->
+    <setting name="mapUnderscoreToCamelCase" value="true"/>
+    <!-- NULL 값 처리 -->
+    <setting name="jdbcTypeForNull" value="NULL"/>
+    <!-- 로깅 출력 (개발 시 활성화, 운영 시 비활성화) -->
+    <setting name="logImpl" value="STDOUT_LOGGING"/>
+  </settings>
+
+  <!-- 타입 별칭 설정 (DTO 패키지) -->
+  <typeAliases>
+    <package name="com.board.dto"/>
+  </typeAliases>
+
+  <!-- 환경 설정 -->
+  <environments default="development">
+    <environment id="development">
+      <!-- 트랜잭션 관리자 (JDBC 사용) -->
+      <transactionManager type="JDBC"/>
+
+      <!-- 데이터 소스 (POOLED: 커넥션 풀 사용) -->
+      <dataSource type="POOLED">
+        <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/board_system?useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Asia/Seoul"/>
+        <property name="username" value="root"/>
+        <property name="password" value="asd@1252370"/>
+
+        <!-- 커넥션 풀 설정 -->
+        <property name="poolMaximumActiveConnections" value="10"/>
+        <property name="poolMaximumIdleConnections" value="5"/>
+        <property name="poolMaximumCheckoutTime" value="20000"/>
+        <property name="poolTimeToWait" value="20000"/>
+      </dataSource>
+    </environment>
+  </environments>
+
+  <!-- Mapper XML 파일 등록 -->
+  <mappers>
+    <mapper resource="mapper/BoardMapper.xml"/>
+    <mapper resource="mapper/FileMapper.xml"/>
+    <mapper resource="mapper/CommentMapper.xml"/>
+    <mapper resource="mapper/CategoryMapper.xml"/>
+  </mappers>
+</configuration>
